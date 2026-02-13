@@ -137,3 +137,15 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# IDE configurations
+.idea/
+.vscode/
+
+# Imposter mock server
+.imposter/
+
+# Groovy
+*.class
+.gradle/
+build/
