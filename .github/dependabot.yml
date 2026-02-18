@@ -1,0 +1,28 @@
+# Set update schedule for GitHub actions and other package managers
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      github-actions-updates:
+        patterns:
+          - "*"
+  - package-ecosystem: "docker"
+    directory: "/mock-sts"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
