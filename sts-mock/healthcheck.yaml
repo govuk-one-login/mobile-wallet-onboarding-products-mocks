@@ -1,0 +1,13 @@
+openapi: "3.0.1"
+info:
+  title: "Healthcheck API"
+  version: "1.0"
+  description: "Provides a healthcheck endpoint for the container"
+paths:
+  /healthcheck:
+    get:
+      operationId: getHealthcheck
+      summary: Health check
+      responses:
+        "200":
+          description: OK
