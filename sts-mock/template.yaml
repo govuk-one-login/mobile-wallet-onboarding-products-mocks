@@ -1,0 +1,430 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Deploys the STS mock service including ECS, ALB, and API Gateway
+
+Parameters:
+  Environment:
+    Description: The environment type
+    Type: String
+    AllowedValues:
+      - dev
+      - build
+      - integration
+    Default: dev
+
+  VpcStackName:
+    Description: The name of the stack that defines the VPC in which this container will run
+    Type: String
+    Default: vpc
+
+  PermissionsBoundary:
+    Description: The ARN of the permissions boundary to apply when creating IAM roles
+    Type: String
+    Default: none
+
+  ContainerPort:
+    Description: The port on which the container is running
+    Type: Number
+    Default: 9090
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      SelfUrl: sts-mock.wallet-onboarding.dev.account.gov.uk
+      StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:219494607463:repository/sts-mock-image-repo-containerrepository-ctjqse5shnuf
+    build:
+      SelfUrl: sts-mock.wallet-onboarding.build.account.gov.uk
+      StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:899032468188:repository/sts-mock-image-repo-containerrepository-c47qvuediwmo
+    integration:
+      SelfUrl: sts-mock.wallet-onboarding.integration.account.gov.uk
+      StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:899032468188:repository/sts-mock-image-repo-containerrepository-c47qvuediwmo
+
+  ElasticLoadBalancerAccountIds:
+    eu-west-2:
+      AccountId: 652711504416
+
+Conditions:
+  UsePermissionsBoundary: !Not
+    - !Equals
+      - !Ref PermissionsBoundary
+      - none
+
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+
+  # SECURITY GROUPS
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: STS mock load balancer security group
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 80
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      VpcId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcId
+
+  LoadBalancerSecurityGroupEgressToEcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt LoadBalancerSecurityGroup.GroupId
+      IpProtocol: tcp
+      Description: Egress between the STS mock load balancer and the STS mock ECS security group
+      DestinationSecurityGroupId: !GetAtt EcsSecurityGroup.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+
+  EcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: STS mock ECS security group
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      VpcId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcId
+
+  EcsSecurityGroupIngressFromLoadBalancer:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      Description: STS mock ECS allows inbound from the STS mock load balancer
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt EcsSecurityGroup.GroupId
+      SourceSecurityGroupId: !GetAtt LoadBalancerSecurityGroup.GroupId
+
+  # ACCESS LOGS
+  ApiGatewayAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-gateway-access-logs
+      RetentionInDays: 14
+
+  EcsAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${AWS::StackName}-ecs
+      RetentionInDays: 14
+
+  AccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${Environment}-access-logs
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  AccessLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AccessLogsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub
+                - arn:aws:iam::${ElbAccountId}:root
+                - ElbAccountId: !FindInMap
+                    - ElasticLoadBalancerAccountIds
+                    - !Ref AWS::Region
+                    - AccountId
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub arn:aws:s3:::${AccessLogsBucket}/sts-mock-${Environment}/AWSLogs/${AWS::AccountId}/*
+          - Effect: Deny
+            Principal:
+              AWS: '*'
+            Action: '*'
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref AccessLogsBucket
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt LoadBalancerSecurityGroup.GroupId
+      Subnets:
+        - !ImportValue
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+        - !ImportValue
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+        - !ImportValue
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+      Type: application
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: true
+        - Key: access_logs.s3.bucket
+          Value: !Ref AccessLogsBucket
+        - Key: access_logs.s3.prefix
+          Value: !Sub sts-mock-${Environment}
+        - Key: idle_timeout.timeout_seconds
+          Value: 60
+
+  LoadBalancerListenerTargetGroupECS:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: TRUE
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /healthcheck
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 60
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-499
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcId
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECS
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  ApiGatewayHttpEndpoint:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub ${AWS::StackName}-${Environment}
+      ProtocolType: HTTP
+
+  ApiGatewayHttpEndpointIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcLinkId
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref LoadBalancerListener
+      PayloadFormatVersion: "1.0"
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+
+  ApiGatewayRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      RouteKey: ANY /{proxy+}
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref ApiGatewayHttpEndpointIntegration
+
+  ApiStageDefault:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      StageName: $default
+      AutoDeploy: true
+      DefaultRouteSettings:
+        DataTraceEnabled: false
+        DetailedMetricsEnabled: true
+        ThrottlingBurstLimit: 400
+        ThrottlingRateLimit: 1200
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiGatewayAccessLogsGroup.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "path": "$context.path", "routeKey":"$context.routeKey", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+
+  CustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - SelfUrl
+      DomainNameConfigurations:
+        - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  ApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref CustomDomain
+      Type: A
+      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
+      AliasTarget:
+        DNSName: !GetAtt CustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
+        EvaluateTargetHealth: false
+
+  ApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Ref CustomDomain
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      Stage: !Ref ApiStageDefault
+
+  # ECS
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  EcsService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - LoadBalancerListener
+    Properties:
+      Cluster: !Ref EcsCluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECS
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt EcsSecurityGroup.GroupId
+          Subnets:
+            - !ImportValue
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+      TaskDefinition: !Ref EcsServiceTaskDefinition
+
+  EcsServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Essential: true
+
+          # Image is replaced by ./build-and-deploy-image.sh (manual dev deployment) or GitHub Actions (pipeline deployments).
+          Image: CONTAINER-IMAGE-PLACEHOLDER
+          Name: app
+          Environment:
+            - Name: AWS_REGION
+              Value: !Sub ${AWS::Region}
+            - Name: ENVIRONMENT
+              Value: !Sub ${Environment}
+            - Name: SELF_URL
+              Value: !Sub
+                - https://${SelfUrl}
+                - SelfUrl: !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - SelfUrl
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref EcsAccessLogsGroup
+              awslogs-region: !Sub ${AWS::Region}
+              awslogs-stream-prefix: !Sub sts-mock-${Environment}
+      Cpu: "1024"
+      ExecutionRoleArn: !GetAtt EcsTaskExecutionRole.Arn
+      Memory: "2048"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt EcsTaskRole.Arn
+
+  EcsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Allows ECS tasks to pull images from ECR and write logs
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyName: StsMockEcsTaskExecutionRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchCheckLayerAvailability
+                Resource:
+                  - !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - StsMockImageRepositoryArn
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource:
+                  - '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !GetAtt EcsAccessLogsGroup.Arn
+                  - !Sub ${EcsAccessLogsGroup.Arn}:*
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  EcsTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+Outputs:
+  StsMockFriendlyUrl:
+    Description: Friendly URL for the deployed STS mock service
+    Value: !FindInMap
+      - EnvironmentVariables
+      - !Ref Environment
+      - SelfUrl
