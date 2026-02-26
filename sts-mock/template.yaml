@@ -25,7 +25,7 @@ Parameters:
   ContainerPort:
     Description: The port on which the container is running
     Type: Number
-    Default: 9090
+    Default: 8080
 
 Mappings:
   EnvironmentVariables:
