@@ -1,0 +1,36 @@
+name: STS Mock - Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+    paths:
+      - sts-mock/**
+      - .github/workflows/sts-mock-pull-request-checks.yml
+      - .github/workflows/validate-sam-template.yml
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-docker-image:
+    name: Validate Docker image
+    uses: ./.github/workflows/validate-docker-image.yml
+    with:
+      working_directory: ./sts-mock
+
+  validate-sam-template:
+    name: Validate SAM template
+    uses: ./.github/workflows/validate-sam-template.yml
+    with:
+      working_directory: ./sts-mock
+    secrets:
+      role_to_assume: ${{ secrets.DEV_STS_MOCK_GH_ACTIONS_ROLE_ARN }}

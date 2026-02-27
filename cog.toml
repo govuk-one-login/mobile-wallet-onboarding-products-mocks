@@ -1,0 +1,2 @@
+# Ignore merge commits from conventional commit checks
+ignore_merge_commits = true

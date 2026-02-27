@@ -1,0 +1,47 @@
+name: Validate SAM Template
+
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        required: true
+        type: string
+    secrets:
+      role_to_assume:
+        required: true
+
+jobs:
+  validate_sam_template:
+    name: Validate SAM template
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
+        with:
+          version: 1.131.0
+          use-installer: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+        with:
+          role-to-assume: ${{ secrets.role_to_assume }}
+          aws-region: eu-west-2
+
+      - name: Validate SAM template
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate
+
+      - name: Build SAM template
+        working-directory: ${{ inputs.working_directory }}
+        run: sam build
