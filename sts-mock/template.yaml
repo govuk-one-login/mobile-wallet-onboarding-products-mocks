@@ -49,6 +49,10 @@ Conditions:
       - !Ref PermissionsBoundary
       - none
 
+  StackNameIsWalletStsMock: !Equals
+    - !Ref AWS::StackName
+    - wallet-sts-mock
+
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
@@ -259,10 +263,18 @@ Resources:
   CustomDomain:
     Type: AWS::ApiGatewayV2::DomainName
     Properties:
-      DomainName: !FindInMap
-        - EnvironmentVariables
-        - !Ref Environment
-        - SelfUrl
+      DomainName: !If
+        - StackNameIsWalletStsMock
+        - !FindInMap
+          - EnvironmentVariables
+          - !Ref Environment
+          - SelfUrl
+        - !Sub
+          - ${AWS::StackName}-${SelfUrl}
+          - SelfUrl: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - SelfUrl
       DomainNameConfigurations:
         - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
           EndpointType: REGIONAL
@@ -340,12 +352,20 @@ Resources:
             - Name: ENVIRONMENT
               Value: !Sub ${Environment}
             - Name: SELF_URL
-              Value: !Sub
-                - https://${SelfUrl}
-                - SelfUrl: !FindInMap
-                    - EnvironmentVariables
-                    - !Ref Environment
-                    - SelfUrl
+              Value: !If
+                - StackNameIsWalletStsMock
+                - !Sub
+                  - https://${SelfUrl}
+                  - SelfUrl: !FindInMap
+                      - EnvironmentVariables
+                      - !Ref Environment
+                      - SelfUrl
+                - !Sub
+                  - https://${AWS::StackName}-${SelfUrl}
+                  - SelfUrl: !FindInMap
+                      - EnvironmentVariables
+                      - !Ref Environment
+                      - SelfUrl
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
@@ -424,7 +444,15 @@ Resources:
 Outputs:
   StsMockFriendlyUrl:
     Description: Friendly URL for the deployed STS mock service
-    Value: !FindInMap
-      - EnvironmentVariables
-      - !Ref Environment
-      - SelfUrl
+    Value: !If
+      - StackNameIsWalletStsMock
+      - !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - SelfUrl
+      - !Sub
+        - ${AWS::StackName}-${SelfUrl}
+        - SelfUrl: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - SelfUrl
