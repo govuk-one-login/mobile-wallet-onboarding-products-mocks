@@ -1,3 +1,7 @@
 # IDE configurations
 .idea/
 .vscode/
+
+# AWS SAM
+*/.aws-sam/
+*/samconfig.toml
