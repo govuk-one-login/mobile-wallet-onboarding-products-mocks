@@ -1,0 +1,87 @@
+name: STS Mock - Manual Deployment to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      SAM_CLI_TELEMETRY: 0
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          # Check out the repository at the specific branch, tag, or commit
+          ref: ${{ inputs.gitRef }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        with:
+          role-to-assume: ${{ secrets.DEV_STS_MOCK_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+
+      - name: Set GIT_REF_SHA
+        # Set GIT_REF_SHA to the checked-out commit SHA
+        run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Build, tag and push image to ECR
+        working-directory: ./sts-mock
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.DEV_STS_MOCK_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
+        with:
+          version: 1.131.0
+          use-installer: true
+
+      - name: Validate SAM template
+        working-directory: ./sts-mock
+        run: sam validate
+
+      - name: Package SAM template
+        working-directory: ./sts-mock
+        env:
+          ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+        run: sam package --s3-bucket="$ARTIFACT_BUCKET_NAME" --output-template-file=cf-template.yaml
+
+      - name: Update SAM template with ECR image
+        working-directory: ./sts-mock
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.DEV_STS_MOCK_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
+        run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
+
+      - name: Compress SAM template
+        working-directory: ./sts-mock
+        run: zip template.zip cf-template.yaml
+
+      - name: Upload compressed template to the artificat bucket
+        working-directory: ./sts-mock
+        env:
+          ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
+        run: |
+          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$IMAGE_TAG"
