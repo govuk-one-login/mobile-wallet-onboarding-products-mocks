@@ -72,7 +72,9 @@ jobs:
         run: sam build
 
       - name: Zip SAM template
-        run: zip template.zip .aws-sam/build/template.yaml
+        run: |
+          mv .aws-sam/build/template.yaml cf-template.yaml
+          zip template.zip cf-template.yaml
 
       - name: Upload artifact to S3
         env:
