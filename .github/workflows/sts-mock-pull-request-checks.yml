@@ -19,6 +19,8 @@ jobs:
   validate-docker-image:
     name: Validate Docker image
     uses: ./.github/workflows/validate-docker-image.yml
+    with:
+      working-directory: ./sts-mock
 
   validate-and-build-sam-template:
     name: Validate and build SAM template

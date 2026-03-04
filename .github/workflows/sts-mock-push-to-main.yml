@@ -12,6 +12,8 @@ jobs:
   validate-docker-image:
     name: Validate Docker image
     uses: ./.github/workflows/validate-docker-image.yml
+    with:
+      working-directory: ./sts-mock
 
   deploy:
     name: Deploy
