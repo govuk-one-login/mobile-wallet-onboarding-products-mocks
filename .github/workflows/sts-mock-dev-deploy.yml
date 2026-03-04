@@ -58,23 +58,21 @@ jobs:
           version: 1.154.0
           use-installer: true
 
-      - name: Validate SAM template
-        run: sam validate --lint
-
-      - name: Package SAM template
-        env:
-          ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
-        run: sam package --s3-bucket="$ARTIFACT_BUCKET_NAME" --output-template-file=cf-template.yaml
-
       - name: Update SAM template with ECR image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.DEV_STS_MOCK_ECR_REPOSITORY_NAME }}
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
-        run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
+        run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" template.yaml
+
+      - name: Validate SAM template
+        run: sam validate --lint
+
+      - name: Build SAM template
+        run: sam build
 
       - name: Zip SAM template
-        run: zip template.zip cf-template.yaml
+        run: zip template.zip .aws-sam/build/template.yaml
 
       - name: Upload artifact to S3
         env:
