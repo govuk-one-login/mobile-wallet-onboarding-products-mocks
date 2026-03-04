@@ -53,7 +53,7 @@ jobs:
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
         with:
-          version: 1.131.0
+          version: 1.154.0
           use-installer: true
 
       - name: Validate SAM template
