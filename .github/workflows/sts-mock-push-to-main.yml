@@ -69,7 +69,7 @@ jobs:
       - name: Update SAM template with ECR image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.DEV_STS_MOCK_ECR_REPOSITORY_NAME }}
+          ECR_REPOSITORY: ${{ secrets.BUILD_STS_MOCK_ECR_REPOSITORY_NAME }}
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
         run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" .aws-sam/build/template.yaml
 
