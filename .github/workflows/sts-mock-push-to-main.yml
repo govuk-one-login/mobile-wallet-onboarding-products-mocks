@@ -11,48 +11,13 @@ on:
 jobs:
   validate-docker-image:
     name: Validate Docker image
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: ./sts-mock
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - name: Build Docker image
-        run: docker build -t sts-mock .
-
-  validate-and-build-sam-template:
-    name: Validate and build SAM template
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    env:
-      SAM_CLI_TELEMETRY: 0
-    defaults:
-      run:
-        working-directory: ./sts-mock
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - name: Set up SAM CLI
-        uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
-        with:
-          version: 1.154.0
-          use-installer: true
-
-      - name: Validate SAM template
-        run: sam validate --lint
-
-      - name: Build SAM template
-        run: sam build
+    uses: ./.github/workflows/validate-docker-image.yml
 
   deploy:
     name: Deploy
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    needs: [validate-docker-image, validate-and-build-sam-template]
+    needs: [validate-docker-image]
     permissions:
       id-token: write
       contents: read

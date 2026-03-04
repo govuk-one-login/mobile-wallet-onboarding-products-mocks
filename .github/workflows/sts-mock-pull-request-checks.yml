@@ -18,17 +18,7 @@ concurrency:
 jobs:
   validate-docker-image:
     name: Validate Docker image
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: ./sts-mock
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - name: Build Docker image
-        run: docker build -t sts-mock .
+    uses: ./.github/workflows/validate-docker-image.yml
 
   validate-and-build-sam-template:
     name: Validate and build SAM template
