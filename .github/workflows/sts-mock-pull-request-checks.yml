@@ -1,0 +1,53 @@
+name: STS Mock - Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+    paths:
+      - sts-mock/**
+      - .github/workflows/sts-mock-pull-request-checks.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-docker-image:
+    name: Validate Docker image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Build Docker image
+        working-directory: ./sts-mock
+        run: docker build -t sts-mock .
+
+  validate-and-build-sam-template:
+    name: Validate and build SAM template
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SAM_CLI_TELEMETRY: 0
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
+        with:
+          version: 1.154.0
+          use-installer: true
+
+      - name: Validate SAM template
+        working-directory: ./sts-mock
+        run: sam validate --lint
+
+      - name: Build SAM template
+        working-directory: ./sts-mock
+        run: sam build
