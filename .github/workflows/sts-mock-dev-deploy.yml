@@ -74,11 +74,11 @@ jobs:
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
         run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
 
-      - name: Compress SAM template
+      - name: Zip SAM template
         working-directory: ./sts-mock
         run: zip template.zip cf-template.yaml
 
-      - name: Upload compressed template to the artificat bucket
+      - name: Upload artifact to S3
         working-directory: ./sts-mock
         env:
           ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
