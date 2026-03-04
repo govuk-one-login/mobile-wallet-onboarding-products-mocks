@@ -19,6 +19,9 @@ jobs:
       contents: read
     env:
       SAM_CLI_TELEMETRY: 0
+    defaults:
+      run:
+        working-directory: ./sts-mock
     steps:
       - name: Check out repository code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -41,7 +44,6 @@ jobs:
         run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Build, tag and push image to ECR
-        working-directory: ./sts-mock
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.DEV_STS_MOCK_ECR_REPOSITORY_NAME }}
@@ -57,17 +59,14 @@ jobs:
           use-installer: true
 
       - name: Validate SAM template
-        working-directory: ./sts-mock
         run: sam validate --lint
 
       - name: Package SAM template
-        working-directory: ./sts-mock
         env:
           ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
         run: sam package --s3-bucket="$ARTIFACT_BUCKET_NAME" --output-template-file=cf-template.yaml
 
       - name: Update SAM template with ECR image
-        working-directory: ./sts-mock
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.DEV_STS_MOCK_ECR_REPOSITORY_NAME }}
@@ -75,11 +74,9 @@ jobs:
         run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
 
       - name: Zip SAM template
-        working-directory: ./sts-mock
         run: zip template.zip cf-template.yaml
 
       - name: Upload artifact to S3
-        working-directory: ./sts-mock
         env:
           ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
