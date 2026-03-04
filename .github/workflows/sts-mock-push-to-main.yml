@@ -1,0 +1,119 @@
+name: STS Mock - Push to Main
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - sts-mock/**
+      - .github/workflows/sts-mock-push-to-main.yml
+
+jobs:
+  validate-docker-image:
+    name: Validate Docker image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./sts-mock
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Build Docker image
+        run: docker build -t sts-mock .
+
+  validate-and-build-sam-template:
+    name: Validate and build SAM template
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SAM_CLI_TELEMETRY: 0
+    defaults:
+      run:
+        working-directory: ./sts-mock
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
+        with:
+          version: 1.154.0
+          use-installer: true
+
+      - name: Validate SAM template
+        run: sam validate --lint
+
+      - name: Build SAM template
+        run: sam build
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: [validate-docker-image, validate-and-build-sam-template]
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      SAM_CLI_TELEMETRY: 0
+    defaults:
+      run:
+        working-directory: ./sts-mock
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          # Check out the repository at the specified branch, tag, or commit
+          ref: ${{ inputs.gitRef }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        with:
+          role-to-assume: ${{ secrets.BUILD_STS_MOCK_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+        with:
+          cosign-release: 'v3.0.5'
+
+      - name: Build, tag and push image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.BUILD_STS_MOCK_ECR_REPOSITORY_NAME }}
+          CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_STS_MOCK_CONTAINER_SIGNER_KMS_KEY_ARN }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
+        with:
+          version: 1.154.0
+          use-installer: true
+
+      - name: Update SAM template with ECR image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.DEV_STS_MOCK_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
+        run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" .aws-sam/build/template.yaml
+
+      - name: Validate SAM template
+        run: sam validate --lint
+
+      - name: Build SAM template
+        run: sam build
+
+      - name: Deploy SAM app
+        uses: govuk-one-login/devplatform-upload-action@b7bc01ed6e0b61d54f42e7f3d12dd3fdbb0f172a # v3.13.0
+        with:
+          artifact-bucket-name: ${{ secrets.BUILD_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          template-file: .aws-sam/build/template.yaml
