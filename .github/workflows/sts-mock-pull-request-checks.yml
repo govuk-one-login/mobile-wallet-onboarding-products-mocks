@@ -32,9 +32,6 @@ jobs:
     name: Validate and build SAM template
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    permissions:
-      id-token: write
-      contents: read
     env:
       SAM_CLI_TELEMETRY: 0
     steps:
@@ -46,12 +43,6 @@ jobs:
         with:
           version: 1.154.0
           use-installer: true
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
-        with:
-          role-to-assume: ${{ secrets.DEV_STS_MOCK_GH_ACTIONS_ROLE_ARN }}
-          aws-region: eu-west-2
 
       - name: Validate SAM template
         working-directory: ./sts-mock
