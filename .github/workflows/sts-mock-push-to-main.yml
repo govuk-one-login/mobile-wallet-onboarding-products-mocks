@@ -73,7 +73,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.BUILD_STS_MOCK_ECR_REPOSITORY_NAME }}
           IMAGE_TAG: $GITHUB_SHA
-        run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" .aws-sam/build/template.yaml
+        run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" template.yaml
 
       - name: Validate SAM template
         run: sam validate --lint
