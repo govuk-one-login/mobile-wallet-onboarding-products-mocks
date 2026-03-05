@@ -2,3 +2,8 @@ plugin: openapi
 specFile: sts.yaml
 validation:
   request: true
+resources:
+  - path: /token
+    method: POST
+    response:
+      scriptFile: token.groovy
