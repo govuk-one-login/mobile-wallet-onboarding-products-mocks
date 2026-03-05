@@ -56,10 +56,11 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.BUILD_STS_MOCK_ECR_REPOSITORY_NAME }}
           CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_STS_MOCK_CONTAINER_SIGNER_KMS_KEY_ARN }}
+          IMAGE_TAG: $GITHUB_SHA
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
-          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@c2a20b1822cc4a6bc594ff7f1dbb658758e383c3 # v2
@@ -71,7 +72,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.BUILD_STS_MOCK_ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
+          IMAGE_TAG: $GITHUB_SHA
         run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" .aws-sam/build/template.yaml
 
       - name: Validate SAM template
