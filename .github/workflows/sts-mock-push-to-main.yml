@@ -8,6 +8,10 @@ on:
       - sts-mock/**
       - .github/workflows/sts-mock-push-to-main.yml
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   validate-docker-image:
     name: Validate Docker image
