@@ -1,11 +1,13 @@
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 def params = parseUrlEncodedBody(context.request.body)
 def grantType = params['grant_type']
 
 if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def preAuthorizedCode = params['pre-authorized_code']
-    def responseBody = [access_token: "accessToken", token_type: "bearer", expires_in: 180]
+    def accessToken = buildAccessToken(preAuthorizedCode)
+    def responseBody = [access_token: accessToken, token_type: "bearer", expires_in: 180]
     respond().withData(JsonOutput.toJson(responseBody))
 
 } else if (grantType == 'authorization_code') {
@@ -36,4 +38,43 @@ static def parseUrlEncodedBody(String body) {
         }
     }
     return params
+}
+
+/**
+ * Builds an access token for the pre-authorized code flow.
+ *
+ * Decodes the pre-authorized code to extract the credential_identifiers claim, then builds an access token with:
+ * - Header: ES256 algorithm, at+jwt type, and a fixed key ID
+ * - Payload: subject, issuer, audience, credential identifiers from the pre-authorized code,
+ *   a random c_nonce, 180-second expiration, and a random JWT ID
+ * - Signature: hardcoded, so not cryptographically valid
+ *
+ * @param jwt The pre-authorized code
+ * @return The access token
+ */
+def buildAccessToken(String jwt) {
+    def preAuthorizedCodeParts = jwt.split('\\.')
+    def preAuthorizedCodePayloadString = new String(Base64.decoder.decode(preAuthorizedCodeParts[1]))
+    def preAuthorizedCodePayloadMap = new JsonSlurper().parseText(preAuthorizedCodePayloadString)
+
+    def selfUrl = System.getenv('SELF_URL')
+    def issuerBaseUrl = System.getenv('CREDENTIAL_ISSUER_URL')
+
+    def accessTokenPayload = [
+            sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+            iss                   : selfUrl,
+            aud                   : issuerBaseUrl,
+            credential_identifiers: preAuthorizedCodePayloadMap.credential_identifiers,
+            c_nonce               : UUID.randomUUID().toString(),
+            exp                   : (System.currentTimeMillis() / 1000).toLong() + 180,
+            jti                   : UUID.randomUUID().toString()
+    ]
+    def encodedPayload = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(accessTokenPayload).bytes)
+
+    def accessTokenHeader = [alg: "ES256", typ: "at+jwt", kid: "C9De3xMDDyG7Nce4kGm09pCamzTMmYefPSmWw4FhnUg"]
+    def encodedHeader = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(accessTokenHeader).bytes)
+
+    def encodedSignature = "yBpJ0zhIZWNQqpszXxbil8FmI0DcJ_JG7mHZlrBthVg16lkrcvj662Swl5tpXZbhm-k6LKsmh8CbiiCp-4bRkg"
+
+    return "${encodedHeader}.${encodedPayload}.${encodedSignature}"
 }
