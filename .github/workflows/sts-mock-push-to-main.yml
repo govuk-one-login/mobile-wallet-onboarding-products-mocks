@@ -85,4 +85,5 @@ jobs:
         uses: govuk-one-login/devplatform-upload-action@b7bc01ed6e0b61d54f42e7f3d12dd3fdbb0f172a # v3.13.0
         with:
           artifact-bucket-name: ${{ secrets.BUILD_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          working-directory: ./sts-mock
           template-file: .aws-sam/build/template.yaml
