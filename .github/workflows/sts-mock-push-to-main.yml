@@ -56,7 +56,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.BUILD_STS_MOCK_ECR_REPOSITORY_NAME }}
           CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_STS_MOCK_CONTAINER_SIGNER_KMS_KEY_ARN }}
-          IMAGE_TAG: $GITHUB_SHA
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -72,7 +72,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.BUILD_STS_MOCK_ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: $GITHUB_SHA
+          IMAGE_TAG: ${{ github.sha }}
         run: sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" template.yaml
 
       - name: Validate SAM template
