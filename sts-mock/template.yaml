@@ -347,10 +347,6 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
-            - Name: AWS_REGION
-              Value: !Sub ${AWS::Region}
-            - Name: ENVIRONMENT
-              Value: !Sub ${Environment}
             - Name: SELF_URL
               Value: !If
                 - StackNameIsWalletStsMock
