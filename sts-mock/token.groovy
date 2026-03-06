@@ -6,7 +6,14 @@ def grantType = params['grant_type']
 
 if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def preAuthorizedCode = params['pre-authorized_code']
-    def accessToken = buildAccessToken(preAuthorizedCode)
+    def payload = parseJwtPayload(preAuthorizedCode)
+
+    if (payload.exp < (System.currentTimeMillis() / 1000)) {
+        respond().withStatusCode(400).withExampleName('errorInvalidGrant')
+        return
+    }
+
+    def accessToken = buildAccessToken(payload)
     def responseBody = [access_token: accessToken, token_type: "bearer", expires_in: 180]
     respond().withData(JsonOutput.toJson(responseBody))
 
@@ -41,6 +48,18 @@ static def parseUrlEncodedBody(String body) {
 }
 
 /**
+ * Parses the payload of a JWT.
+ *
+ * @param jwt The JWT to parse
+ * @return The JWT payload as a map
+ */
+static def parseJwtPayload(String jwt) {
+    def parts = jwt.split('\\.')
+    def payloadString = new String(Base64.decoder.decode(parts[1]))
+    return new JsonSlurper().parseText(payloadString)
+}
+
+/**
  * Builds an access token for the pre-authorized code flow.
  *
  * Decodes the pre-authorized code to extract the credential_identifiers claim, then builds an access token with:
@@ -49,14 +68,10 @@ static def parseUrlEncodedBody(String body) {
  *   a random c_nonce, 180-second expiration, and a random JWT ID
  * - Signature: hardcoded, so not cryptographically valid
  *
- * @param jwt The pre-authorized code
+ * @param payload The payload of the pre-authorized code as a map
  * @return The access token
  */
-def buildAccessToken(String jwt) {
-    def preAuthorizedCodeParts = jwt.split('\\.')
-    def preAuthorizedCodePayloadString = new String(Base64.decoder.decode(preAuthorizedCodeParts[1]))
-    def preAuthorizedCodePayloadMap = new JsonSlurper().parseText(preAuthorizedCodePayloadString)
-
+def buildAccessToken(Map payload) {
     def selfUrl = System.getenv('SELF_URL')
     def issuerBaseUrl = System.getenv('CREDENTIAL_ISSUER_URL')
 
@@ -64,7 +79,7 @@ def buildAccessToken(String jwt) {
             sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
             iss                   : selfUrl,
             aud                   : issuerBaseUrl,
-            credential_identifiers: preAuthorizedCodePayloadMap.credential_identifiers,
+            credential_identifiers: payload.credential_identifiers,
             c_nonce               : UUID.randomUUID().toString(),
             exp                   : (System.currentTimeMillis() / 1000).toLong() + 180,
             jti                   : UUID.randomUUID().toString()
