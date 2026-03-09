@@ -8,7 +8,7 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def preAuthorizedCode = params['pre-authorized_code']
     def payload = parseJwtPayload(preAuthorizedCode)
 
-    if (payload.exp < (System.currentTimeMillis() / 1000)) {
+    if (payload.exp < (System.currentTimeMillis() / 1000 as Long)) {
         respond().withStatusCode(400).withExampleName('errorInvalidGrant')
         return
     }
@@ -81,7 +81,7 @@ def buildAccessToken(Map payload) {
             aud                   : issuerBaseUrl,
             credential_identifiers: payload.credential_identifiers,
             c_nonce               : UUID.randomUUID().toString(),
-            exp                   : (System.currentTimeMillis() / 1000) + 180,
+            exp                   : ((System.currentTimeMillis() / 1000) as Long) + 180,
             jti                   : UUID.randomUUID().toString()
     ]
     def encodedPayload = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(accessTokenPayload).bytes)
