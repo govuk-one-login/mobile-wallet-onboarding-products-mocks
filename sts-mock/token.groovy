@@ -72,8 +72,8 @@ static def parseJwtPayload(String jwt) {
  * @return The access token
  */
 def buildAccessToken(Map payload) {
-    def selfUrl = System.getenv('SELF_URL')
-    def issuerBaseUrl = System.getenv('CREDENTIAL_ISSUER_URL')
+    def selfUrl = System.getenv('SELF_URL') ?: "http://localhost:9090"
+    def issuerBaseUrl = System.getenv('CREDENTIAL_ISSUER_URL') ?: "http://localhost:8080"
 
     def accessTokenPayload = [
             sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
