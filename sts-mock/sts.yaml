@@ -219,6 +219,51 @@ components:
             type: "string"
             enum:
               - "Not Implemented"
+    TemporarilyUnavailable:
+      description: Temporarily unavailable
+      headers:
+        Cache-Control:
+          schema:
+            type: "string"
+        Content-Type:
+          schema:
+            type: "string"
+        Strict-Transport-Security:
+          schema:
+            type: "string"
+        X-Content-Type-Options:
+          schema:
+            type: "string"
+        X-Frame-Options:
+          schema:
+            type: "string"
+      content:
+        application/json:
+          examples:
+            errorTemporarilyUnavailable:
+              description: |
+                The token endpoint is temporarily unavailable.
+              value:
+                {
+                  "error": "temporarily_unavailable",
+                  "error_description": "Temporarily Unavailable"
+                }
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                enum:
+                  - temporarily_unavailable
+                description: |
+                  The error code.
+              error_description:
+                type: string
+                description: |
+                  A description of the error.
+            required:
+              - error
+              - error_description
 
 paths:
   /error:
@@ -657,11 +702,67 @@ paths:
           content:
             application/json:
               examples:
-                success:
+                authorization_code:
                   value:
                     {
-                      "access_token": "SlAV32hkKG",
-                      "token_type": "bearer",
+                      "access_token": "access_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                authorization_code_openid:
+                  value:
+                    {
+                      "access_token": "access_token",
+                      "id_token": "id_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                authorization_code_refresh:
+                  value:
+                    {
+                      "access_token": "access_token",
+                      "refresh_token": "refresh_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                authorization_code_openid_refresh:
+                  value:
+                    {
+                      "access_token": "access_token",
+                      "id_token": "id_token",
+                      "refresh_token": "refresh_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                token_exchange:
+                  value:
+                    {
+                      "access_token": "service_token",
+                      "issued_token_type": "urn:ietf:params:oauth:token-type:access_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                pre_authorized_code:
+                  value:
+                    {
+                      "access_token": "credential_issuer_access_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                pre_authorized_code_refresh:
+                  value:
+                    {
+                      "access_token": "credential_issuer_access_token",
+                      "refresh_token": "refresh_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                refresh_token:
+                  value:
+                    {
+                      "access_token": "refreshed_access_token",
+                      "refresh_token": "new_refresh_token",
+                      "token_type": "Bearer",
                       "expires_in": 180
                     }
               schema:
@@ -683,8 +784,8 @@ paths:
                   refresh_token:
                     type: string
                     description: |
-                      A token which can be exchanged for a new STS access token if the original access token has expired.
-                      This field is optional, and may be returned only if the `grant_type` of the request was `authorization_code` or `refresh_token` and if a `DPoP` header was provided in the request.
+                      A token which may be issued when an STS access token or credential issuer access token is issued. This token can be exchanged to receive a new access token of the type it was issued with.
+                      This field is optional, and may be returned only if the `grant_type` of the request was `authorization_code`, `urn:ietf:params:oauth:grant-type:pre-authorized_code` or `refresh_token` and if a `DPoP` header was provided in the request.
                   issued_token_type:
                     type: string
                     enum:
@@ -736,14 +837,13 @@ paths:
                       "error": "invalid_request",
                       "error_description": "Invalid request"
                     }
-                errorInvalidGrant:
+                errorInvalidTarget:
                   description: |
-                    The authorization code is invalid (when using `authorization_code` as the `grant_type`) or the pre-authorized code is invalid (when using `urn:ietf:params:oauth:grant-type:pre-authorized_code` as the `grant_type`).
+                    The `scope` requested is invalid.
                   value:
                     {
-                      "error": "invalid_grant",
-                      "error_description": "Authorization code is invalid",
-                      "reason": "pre-authorized_code_already_used"
+                      "error": "invalid_target",
+                      "error_description": "Scope requested is invalid"
                     }
                 errorUnsupportedGrantType:
                   description: |
@@ -753,6 +853,39 @@ paths:
                       "error": "unsupported_grant_type",
                       "error_description": "Unsupported grant type"
                     }
+                errorInvalidGrant:
+                  description: |
+                    The authorization code is invalid (when using `authorization_code` as the `grant_type`) or the pre-authorized code is invalid (when using `urn:ietf:params:oauth:grant-type:pre-authorized_code` as the `grant_type`).
+                  value:
+                    {
+                      "error": "invalid_grant",
+                      "error_description": "Authorization code is invalid",
+                      "reason": "pre-authorized_code_expired"
+                    }
+                errorInvalidClient:
+                  description: |
+                    The client failed to authenticate, is not a known client of STS, is not authorized to issue credentials to wallet, or did not provide appropriate authentication for the provided grant type
+                  value:
+                    {
+                      "error": "invalid_client",
+                      "error_description": "Failed to authenticate client"
+                    }
+                errorUnauthorizedClient:
+                  description: |
+                    The client corresponding to the `client_id` in the request is not authorized to use this grant type.
+                  value:
+                    {
+                      "error": "unauthorized_client",
+                      "error_description": "unsupported response_type in query params"
+                    }
+                errorInvalidDpopProof:
+                  description: |
+                    The `DPoP` field in request headers is in invalid format or the `DPoP` token provided in the header is invalid.
+                  value:
+                    {
+                      "error": "invalid_dpop_proof",
+                      "error_description": "Invalid htm in DPoP JWT"
+                    }
               schema:
                 type: object
                 properties:
@@ -760,11 +893,12 @@ paths:
                     type: string
                     enum:
                       - invalid_request
+                      - invalid_target
                       - unsupported_grant_type
                       - invalid_grant
                       - invalid_client
                       - unauthorized_client
-                      - invalid_target
+                      - invalid_dpop_proof
                     description: |
                       The error code.
                   error_description:
@@ -805,6 +939,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "500":
           $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/TemporarilyUnavailable"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:

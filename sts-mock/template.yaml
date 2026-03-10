@@ -30,12 +30,15 @@ Parameters:
 Mappings:
   EnvironmentVariables:
     dev:
+      CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.dev.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.dev.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:219494607463:repository/sts-mock-image-repo-containerrepository-ctjqse5shnuf
     build:
+      CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.build.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.build.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:899032468188:repository/sts-mock-image-repo-containerrepository-c47qvuediwmo
     integration:
+      CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.integration.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.integration.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:899032468188:repository/sts-mock-image-repo-containerrepository-c47qvuediwmo
 
@@ -347,10 +350,6 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
-            - Name: AWS_REGION
-              Value: !Sub ${AWS::Region}
-            - Name: ENVIRONMENT
-              Value: !Sub ${Environment}
             - Name: SELF_URL
               Value: !If
                 - StackNameIsWalletStsMock
@@ -366,6 +365,13 @@ Resources:
                       - EnvironmentVariables
                       - !Ref Environment
                       - SelfUrl
+            - Name: CREDENTIAL_ISSUER_URL
+              Value: !Sub
+                - https://${CredentialIssuerUrl}
+                - CredentialIssuerUrl: !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - CredentialIssuerUrl
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp

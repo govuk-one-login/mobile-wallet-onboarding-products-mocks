@@ -22,6 +22,27 @@ Run the container:
 docker run -p 9090:8080 sts-mock
 ```
 
+To run the container with environment variable overrides (e.g., for local development), you can use a `.env` file:
+
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Edit `.env` to set your desired values.
+3. Run the container with the `--env-file` flag:
+   ```bash
+   docker run -p 9090:8080 --env-file .env sts-mock
+   ```
+
+Alternatively, you can pass environment variables directly:
+
+```bash
+docker run -p 9090:8080 \
+  -e SELF_URL=http://localhost:9090 \
+  -e CREDENTIAL_ISSUER_URL=http://localhost:8080 \
+  sts-mock
+```
+
 ## Deploying to Dev
 
 > You must be logged into the Onboarding Products `dev` AWS account.
