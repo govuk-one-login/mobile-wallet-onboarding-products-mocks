@@ -195,6 +195,24 @@ components:
         X-Frame-Options:
           schema:
             type: "string"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              error_description:
+                type: string
+          examples:
+            error:
+              description: |
+                The token endpoint is temporarily unavailable.
+              value:
+                {
+                  "error": "server_error",
+                  "error_description": "Internal server error"
+                }
     NotImplemented:
       description: "Not Implemented"
       headers:
