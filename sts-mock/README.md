@@ -2,7 +2,6 @@
 
 A mock of STS (Security Token Service) built using [Imposter](https://www.imposter.sh). The mock server is generated from the OpenAPI specs defined in sts.yaml and healthcheck.yaml.
 
-
 ## Prerequisites
 
 - [Docker](https://www.docker.com)
