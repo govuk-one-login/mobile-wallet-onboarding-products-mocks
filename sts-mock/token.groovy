@@ -6,6 +6,24 @@ def grantType = params['grant_type']
 
 if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def preAuthorizedCode = params['pre-authorized_code']
+
+    if (preAuthorizedCode == "ERROR:401") {
+        respond().withStatusCode(401)
+        return
+
+    } else if (preAuthorizedCode == "ERROR:CLIENT") {
+        respond().withStatusCode(400).withExampleName('errorInvalidClient')
+        return
+
+    } else if (preAuthorizedCode == "ERROR:GRANT") {
+        respond().withStatusCode(400).withExampleName('errorInvalidGrant')
+        return
+
+    } else if (preAuthorizedCode == "ERROR:500") {
+        respond().withStatusCode(500)
+        return
+    }
+
     def payload = parseJwtPayload(preAuthorizedCode)
 
     if (payload.exp < (System.currentTimeMillis() / 1000 as Long)) {
