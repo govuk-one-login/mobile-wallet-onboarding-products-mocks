@@ -880,6 +880,15 @@ paths:
                       "error_description": "Authorization code is invalid",
                       "reason": "pre-authorized_code_already_used"
                     }
+                errorInvalidGrantExpiredPreAuthorizedCode:
+                  description: |
+                    The pre-authorized code is expired.
+                  value:
+                    {
+                      "error": "invalid_grant",
+                      "error_description": "Pre-authorized code is invalid",
+                      "reason": "pre-authorized_code_expired"
+                    }
                 errorInvalidClient:
                   description: |
                     The client failed to authenticate, is not a known client of STS, is not authorized to issue credentials to wallet, or did not provide appropriate authentication for the provided grant type

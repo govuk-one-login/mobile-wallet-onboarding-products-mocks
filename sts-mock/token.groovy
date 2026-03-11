@@ -27,7 +27,7 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def payload = parseJwtPayload(preAuthorizedCode)
 
     if (payload.exp < (System.currentTimeMillis() / 1000 as Long)) {
-        respond().withStatusCode(400).withExampleName('errorInvalidGrant')
+        respond().withStatusCode(400).withExampleName('errorInvalidGrantExpiredPreAuthorizedCode')
         return
     }
 
