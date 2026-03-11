@@ -878,7 +878,7 @@ paths:
                     {
                       "error": "invalid_grant",
                       "error_description": "Authorization code is invalid",
-                      "reason": "pre-authorized_code_expired"
+                      "reason": "pre-authorized_code_already_used"
                     }
                 errorInvalidClient:
                   description: |
