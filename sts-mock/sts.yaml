@@ -195,6 +195,24 @@ components:
         X-Frame-Options:
           schema:
             type: "string"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              error_description:
+                type: string
+          examples:
+            error:
+              description: |
+                The token endpoint is temporarily unavailable.
+              value:
+                {
+                  "error": "server_error",
+                  "error_description": "Internal server error"
+                }
     NotImplemented:
       description: "Not Implemented"
       headers:
@@ -860,6 +878,15 @@ paths:
                     {
                       "error": "invalid_grant",
                       "error_description": "Authorization code is invalid",
+                      "reason": "pre-authorized_code_already_used"
+                    }
+                errorInvalidGrantExpiredPreAuthorizedCode:
+                  description: |
+                    The pre-authorized code is expired.
+                  value:
+                    {
+                      "error": "invalid_grant",
+                      "error_description": "Pre-authorized code is invalid",
                       "reason": "pre-authorized_code_expired"
                     }
                 errorInvalidClient:
