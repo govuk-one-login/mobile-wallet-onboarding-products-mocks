@@ -1,6 +1,6 @@
-# TxMA Mock
+# TxMA Event Mock
 
-A mock of the Mobile Platform `POST /txma-event` endpoint. Built using API Gateway's MOCK integration, it accepts any request body and always returns `200 OK`.
+A mock of the Mobile Platform `POST /txma-event` endpoint. Built using API Gateway's mock integration, it accepts any request body and always returns `200 OK`.
 
 ## Prerequisites
 
