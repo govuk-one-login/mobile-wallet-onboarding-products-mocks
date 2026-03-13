@@ -16,6 +16,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-sam-template-formatting:
+    name: Check SAM template formatting
+    uses: ./.github/workflows/check-sam-template-formatting.yml
+    with:
+      working-directory: ./sts-mock
+
   validate-docker-image:
     name: Validate Docker image
     uses: ./.github/workflows/validate-docker-image.yml
