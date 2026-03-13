@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Mock of the Mobile Platform /txma-event endpoint.
+
+Parameters:
+  Environment:
+    Description: The environment type
+    Type: String
+    AllowedValues:
+      - dev
+      - build
+      - integration
+    Default: dev
+
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  MockApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub ${AWS::StackName}-${Environment}
+      EndpointConfiguration:
+        Types:
+          - REGIONAL

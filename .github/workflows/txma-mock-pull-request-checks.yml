@@ -1,4 +1,4 @@
-name: STS Mock - Pull Request Checks
+name: TxMA Event Mock - Pull Request Checks
 
 on:
   pull_request:
@@ -8,8 +8,8 @@ on:
       - ready_for_review
       - synchronize
     paths:
-      - sts-mock/**
-      - .github/workflows/sts-mock-pull-request-checks.yml
+      - txma-mock/**
+      - .github/workflows/txma-mock-pull-request-checks.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -20,13 +20,7 @@ jobs:
     name: Check SAM template formatting
     uses: ./.github/workflows/check-sam-template-formatting.yml
     with:
-      working-directory: ./sts-mock
-
-  validate-docker-image:
-    name: Validate Docker image
-    uses: ./.github/workflows/validate-docker-image.yml
-    with:
-      working-directory: ./sts-mock
+      working-directory: ./txma-mock
 
   validate-and-build-sam-template:
     name: Validate and build SAM template
@@ -36,7 +30,7 @@ jobs:
       SAM_CLI_TELEMETRY: 0
     defaults:
       run:
-        working-directory: ./sts-mock
+        working-directory: ./txma-mock
     steps:
       - name: Check out repository code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
