@@ -1,0 +1,41 @@
+name: TxMA Event Mock - Manual Deployment to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      SAM_CLI_TELEMETRY: 0
+    defaults:
+      run:
+        working-directory: ./txma-mock
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # Check out the repository at the specific branch, tag, or commit
+          ref: ${{ inputs.gitRef }}
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@d78e1a4a9656d3b223e59b80676a797f20093133 # v2
+        with:
+          version: 1.155.2
+          use-installer: true
+
+      - name: Validate SAM template
+        run: sam validate --lint
+
+      - name: Build SAM template
+        run: sam build
