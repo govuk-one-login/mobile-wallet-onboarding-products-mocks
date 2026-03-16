@@ -12,6 +12,20 @@ Parameters:
       - integration
     Default: dev
 
+Mappings:
+  EnvironmentVariables:
+    dev:
+      SelfUrl: txma-mock.wallet-onboarding.dev.account.gov.uk
+    build:
+      SelfUrl: txma-mock.wallet-onboarding.build.account.gov.uk
+    integration:
+      SelfUrl: txma-mock.wallet-onboarding.integration.account.gov.uk
+
+Conditions:
+  StackNameIsWalletTxMAMock: !Equals
+    - !Ref AWS::StackName
+    - wallet-txma-mock
+
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
@@ -22,3 +36,97 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
+
+  TxmaEventResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MockApi
+      ParentId: !GetAtt MockApi.RootResourceId
+      PathPart: txma-event
+
+  TxmaEventPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MockApi
+      ResourceId: !Ref TxmaEventResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+
+  MockApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: TxmaEventPostMethod
+    Properties:
+      RestApiId: !Ref MockApi
+
+  MockApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref MockApi
+      DeploymentId: !Ref MockApiDeployment
+      StageName: !Ref Environment
+
+  CustomDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !If
+        - StackNameIsWalletTxMAMock
+        - !FindInMap
+          - EnvironmentVariables
+          - !Ref Environment
+          - SelfUrl
+        - !Sub
+          - ${AWS::StackName}-${SelfUrl}
+          - SelfUrl: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - SelfUrl
+      RegionalCertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      SecurityPolicy: TLS_1_2
+
+  BasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    DependsOn: MockApiStage
+    Properties:
+      DomainName: !Ref CustomDomain
+      RestApiId: !Ref MockApi
+      Stage: !Ref Environment
+
+  ApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref CustomDomain
+      Type: A
+      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
+      AliasTarget:
+        DNSName: !GetAtt CustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
+        EvaluateTargetHealth: false
+
+Outputs:
+  TxMAMockFriendlyUrl:
+    Description: Friendly URL for the deployed TxMA mock
+    Value: !If
+      - StackNameIsWalletTxMAMock
+      - !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - SelfUrl
+      - !Sub
+        - ${AWS::StackName}-${SelfUrl}
+        - SelfUrl: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - SelfUrl
