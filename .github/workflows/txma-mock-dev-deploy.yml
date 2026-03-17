@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
+      id-token: write
       contents: read
     env:
       SAM_CLI_TELEMETRY: 0
@@ -39,3 +40,16 @@ jobs:
 
       - name: Build SAM template
         run: sam build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        with:
+          role-to-assume: ${{ secrets.DEV_TXMA_MOCK_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Deploy SAM app
+        uses: govuk-one-login/devplatform-upload-action@b7bc01ed6e0b61d54f42e7f3d12dd3fdbb0f172a # v3.13.0
+        with:
+          artifact-bucket-name: ${{ secrets.DEV_TXMA_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          working-directory: ./txma-mock
+          template-file: .aws-sam/build/template.yaml
