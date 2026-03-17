@@ -76,7 +76,7 @@ jobs:
           mv .aws-sam/build/template.yaml cf-template.yaml
           zip template.zip cf-template.yaml
 
-      - name: Upload artifact to S3
+      - name: Deploy SAM app
         env:
           ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
