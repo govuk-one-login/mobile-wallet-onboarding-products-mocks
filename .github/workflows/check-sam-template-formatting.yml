@@ -11,6 +11,8 @@ jobs:
   check-sam-template-formatting:
     name: Check SAM template formatting
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}

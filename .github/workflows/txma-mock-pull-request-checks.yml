@@ -26,6 +26,8 @@ jobs:
     name: Validate and build SAM template
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
     env:
       SAM_CLI_TELEMETRY: 0
     defaults:
