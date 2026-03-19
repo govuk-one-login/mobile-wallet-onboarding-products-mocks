@@ -55,7 +55,7 @@ jobs:
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@d78e1a4a9656d3b223e59b80676a797f20093133 # v2
         with:
-          version: 1.154.0
+          version: 1.155.2
           use-installer: true
 
       - name: Update SAM template with ECR image
@@ -76,7 +76,7 @@ jobs:
           mv .aws-sam/build/template.yaml cf-template.yaml
           zip template.zip cf-template.yaml
 
-      - name: Upload artifact to S3
+      - name: Deploy SAM app
         env:
           ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_STS_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
