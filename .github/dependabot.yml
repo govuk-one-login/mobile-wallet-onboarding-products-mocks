@@ -17,7 +17,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "docker"
-    directory: "/mock-sts"
+    directory: "/sts-mock"
     schedule:
       interval: "weekly"
       day: "monday"
