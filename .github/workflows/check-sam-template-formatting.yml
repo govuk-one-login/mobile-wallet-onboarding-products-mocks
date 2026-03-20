@@ -1,0 +1,35 @@
+name: Check SAM template formatting
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
+
+jobs:
+  check-sam-template-formatting:
+    name: Check SAM template formatting
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install Rain
+        env:
+          VERSION: v1.24.3
+          ARCH: linux-amd64
+        run: |
+          wget -q "https://github.com/aws-cloudformation/rain/releases/download/${VERSION}/rain-${VERSION}_${ARCH}.zip"
+          unzip "rain-${VERSION}_${ARCH}.zip"
+          chmod +x "rain-${VERSION}_${ARCH}/rain"
+          mv "rain-${VERSION}_${ARCH}/rain" /usr/local/bin/rain
+          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+      - name: Check SAM template formatting
+        run: rain fmt --verify template.yaml

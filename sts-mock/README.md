@@ -6,6 +6,15 @@ A mock of STS (Security Token Service) built using [Imposter](https://www.impost
 
 - [Docker](https://www.docker.com)
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+- [rain](https://github.com/aws-cloudformation/rain)
+
+## SAM Template Formatting
+
+The SAM template is formatted using [rain](https://github.com/aws-cloudformation/rain). To format `template.yaml`:
+
+```bash
+rain fmt -w template.yaml
+```
 
 ## Running Locally
 

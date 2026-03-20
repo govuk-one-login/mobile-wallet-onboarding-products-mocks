@@ -13,6 +13,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-sam-template-formatting:
+    name: Check SAM template formatting
+    uses: ./.github/workflows/check-sam-template-formatting.yml
+    with:
+      working-directory: ./sts-mock
+
   validate-docker-image:
     name: Validate Docker image
     uses: ./.github/workflows/validate-docker-image.yml
@@ -44,10 +50,10 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+        uses: aws-actions/amazon-ecr-login@c962da2960ed15f492addc26fffa274485265950 # v2.0.2
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
         with:
           cosign-release: 'v3.0.5'
 
@@ -65,7 +71,7 @@ jobs:
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@d78e1a4a9656d3b223e59b80676a797f20093133 # v2
         with:
-          version: 1.154.0
+          version: 1.155.2
           use-installer: true
 
       - name: Update SAM template with ECR image
