@@ -1,47 +1,61 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
+println "Raw token request body: ${context.request.body}"
+
 def params = parseUrlEncodedBody(context.request.body)
 def grantType = params['grant_type']
+println "Received request with grant_type: ${grantType}"
 
 if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def preAuthorizedCode = params['pre-authorized_code']
+    println "pre-authorized_code flow, code: ${preAuthorizedCode}"
 
     if (preAuthorizedCode == "ERROR:401") {
+        println "Returning 401 for ERROR:401 trigger"
         respond().withStatusCode(401)
         return
 
     } else if (preAuthorizedCode == "ERROR:CLIENT") {
+        println "Returning 400 errorInvalidClient for ERROR:CLIENT trigger"
         respond().withStatusCode(400).withExampleName('errorInvalidClient')
         return
 
     } else if (preAuthorizedCode == "ERROR:GRANT") {
+        println "Returning 400 errorInvalidGrant for ERROR:GRANT trigger"
         respond().withStatusCode(400).withExampleName('errorInvalidGrant')
         return
 
     } else if (preAuthorizedCode == "ERROR:500") {
+        println "Returning 500 for ERROR:500 trigger"
         respond().withStatusCode(500)
         return
     }
 
     def payload = parseJwtPayload(preAuthorizedCode)
+    println "Parsed JWT payload: ${payload}"
 
     if (payload.exp < (System.currentTimeMillis() / 1000 as Long)) {
+        println "pre-authorized_code expired (exp: ${payload.exp}), returning 400"
         respond().withStatusCode(400).withExampleName('errorInvalidGrantExpiredPreAuthorizedCode')
         return
     }
 
     def accessToken = buildAccessToken(payload)
+    println "Built access token successfully, returning 200"
     def responseBody = [access_token: accessToken, token_type: "bearer", expires_in: 180]
     respond().withData(JsonOutput.toJson(responseBody))
 
 } else if (grantType == 'authorization_code') {
+    println "authorization_code flow, returning authorization_code_openid example"
     respond().withExampleName('authorization_code_openid')
 
 } else if (grantType == 'urn:ietf:params:oauth:grant-type:token-exchange') {
+    println "token-exchange flow, returning token_exchange example"
     respond().withExampleName('token_exchange')
 
 } else if (grantType == 'refresh_token') {
+    println "refresh_token flow, returning refresh_token example"
     respond().withExampleName('refresh_token')
 }
 
