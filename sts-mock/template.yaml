@@ -67,12 +67,12 @@ Resources:
       GroupDescription: STS mock load balancer security group
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
-          Description: Allow from anyone on port 80
-          FromPort: 80
+          Description: Allow from anyone on port 443
+          FromPort: 443
           IpProtocol: tcp
-          ToPort: 80
-      VpcId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcId
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   LoadBalancerSecurityGroupEgressToEcsSecurityGroup:
     Type: AWS::EC2::SecurityGroupEgress
@@ -166,6 +166,8 @@ Resources:
 
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -187,6 +189,8 @@ Resources:
           Value: !Sub sts-mock-${Environment}
         - Key: idle_timeout.timeout_seconds
           Value: 60
+        - Key: deletion_protection.enabled
+          Value: true
 
   LoadBalancerListenerTargetGroupECS:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -215,8 +219,11 @@ Resources:
         - TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECS
           Type: forward
       LoadBalancerArn: !Ref LoadBalancer
-      Port: 80
-      Protocol: HTTP
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
 
   ApiGatewayHttpEndpoint:
     Type: AWS::ApiGatewayV2::Api
@@ -237,6 +244,8 @@ Resources:
       PayloadFormatVersion: "1.0"
       RequestParameters:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref CustomDomain
 
   ApiGatewayRoute:
     Type: AWS::ApiGatewayV2::Route
