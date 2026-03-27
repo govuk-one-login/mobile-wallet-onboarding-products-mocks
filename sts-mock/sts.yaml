@@ -694,6 +694,10 @@ paths:
                   description: |
                     Required if the `grant_type` is `refresh_token`.
                     Pass in the `refresh_token` received from STS here to exchange for a new access token and refresh token.
+                code_verifier:
+                  type: string
+                  description: |
+                    Required if the `grant_type` is `authorization_code`.
               required:
                 - grant_type
       responses:
