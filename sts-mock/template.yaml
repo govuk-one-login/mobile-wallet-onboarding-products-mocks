@@ -71,8 +71,8 @@ Resources:
           FromPort: 443
           IpProtocol: tcp
           ToPort: 443
-      VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+      VpcId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcId
 
   LoadBalancerSecurityGroupEgressToEcsSecurityGroup:
     Type: AWS::EC2::SecurityGroupEgress
@@ -165,9 +165,9 @@ Resources:
                 aws:SecureTransport: false
 
   LoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -222,7 +222,7 @@ Resources:
       Port: 443
       Protocol: HTTPS
       Certificates:
-        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+        - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
       SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
 
   ApiGatewayHttpEndpoint:
