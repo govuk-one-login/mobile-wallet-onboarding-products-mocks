@@ -16,6 +16,8 @@ updates:
       github-actions-updates:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "docker"
     directory: "/sts-mock"
     schedule:
@@ -26,3 +28,5 @@ updates:
       - dependencies
     commit-message:
       prefix: chore
+    cooldown:
+      default-days: 7
