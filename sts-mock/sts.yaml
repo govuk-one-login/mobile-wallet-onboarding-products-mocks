@@ -596,7 +596,7 @@ paths:
             type: string
             pattern: '^Bearer\s[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$'
           description: |
-            Required only when `grant_type` in request body is `urn:ietf:params:oauth:grant-type:token-exchange`
+            Required only when `grant_type` in request body is `urn:ietf:params:oauth:grant-type:pre-authorized_code`
             Value must equal `Bearer <token>` where `<token>` is a valid STS-issued service token (JWE)
         - in: header
           name: OAuth-Client-Attestation
@@ -741,7 +741,7 @@ paths:
                 token_exchange:
                   value:
                     {
-                      "access_token": "service_token",
+                      "access_token": "aGVhZGVy.a2V5.aXY.Y2lwaGVydGV4dA.dGFn",
                       "issued_token_type": "urn:ietf:params:oauth:token-type:access_token",
                       "token_type": "Bearer",
                       "expires_in": 180
