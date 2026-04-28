@@ -107,12 +107,24 @@ Resources:
 
   # ACCESS LOGS
   ApiGatewayAccessLogsGroup:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-gateway-access-logs
       RetentionInDays: 14
 
   EcsAccessLogsGroup:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-ecs
