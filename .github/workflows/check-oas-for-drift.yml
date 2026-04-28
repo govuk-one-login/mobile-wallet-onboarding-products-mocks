@@ -4,6 +4,8 @@ on:
     # runs at midnight every day
     - cron: '0 0 * * *'
   workflow_dispatch:
+  push:
+    branches: [ DCMAW-19247 ]
   workflow_call:
     secrets:
       WALLET_STS_BACK_DEPLOY_KEY:
