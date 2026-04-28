@@ -59,5 +59,5 @@ jobs:
 #    name: Check STS Back OAS for drift
 #    uses: ./.github/workflows/check-oas-for-drift.yml
 #    secrets:
-#      WALLET_CRS_DEPLOY_KEY: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
+#      WALLET_STS_BACK_DEPLOY_KEY: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
 #      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
