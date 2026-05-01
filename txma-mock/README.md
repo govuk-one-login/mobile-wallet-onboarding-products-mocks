@@ -23,7 +23,7 @@ We use Checkov for static analysis of our IaC. Following can be used to run a Ch
 brew install checkov
 
 # Running Checkov analysis
-checkov --file tmxa-mock/template.yaml
+checkov --file txma-mock/template.yaml
 ```
 
 ## Deploying to Dev
