@@ -39,14 +39,19 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
 
+      # oasdiff cannot parse YAML files with duplicate merge keys (<<)
+      # explode(.) resolves all anchors, aliases and merge keys inline
       - name: Normalise base spec
-        run: yq eval '.' ${{ env.STS_BACK_CHECKOUT_PATH }}/${{ env.STS_BACK_OAS_PATH }} > /tmp/sts-backend-normalised.yaml
+        run: yq eval 'explode(.)' ${{ env.STS_BACK_CHECKOUT_PATH }}/${{ env.STS_BACK_OAS_PATH }} > sts-backend-normalised.yaml
+
+      - name: Normalise local spec
+        run: yq eval 'explode(.)' ${{ env.LOCAL_OAS_PATH }} > sts-mock-normalised.yaml
 
       - name: Check OAS for drift
         uses: oasdiff/oasdiff-action/diff@1f38ea5ea0b4a2e4e49901c3bcdf4386a05e9ea1 # v0.0.37
         with:
-          base: /tmp/sts-backend-normalised.yaml
-          revision: ${{ env.LOCAL_OAS_PATH }}
+          base: sts-backend-normalised.yaml
+          revision: sts-mock-normalised.yaml
           fail-on-diff: true
 
   notify-slack-on-failure:
