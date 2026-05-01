@@ -10,14 +10,14 @@ info:
 x-definitions:
   commonSecurityHeaders: &commonSecurityHeaders
     method.response.header.Cache-Control: "'no-store'"
-    method.response.header.Strict-Transport-Security: "'max-age=31536000'"
+    method.response.header.Strict-Transport-Security: "'max-age=31536000; includeSubDomains; preload'"
     method.response.header.X-Content-Type-Options: "'nosniff'"
     method.response.header.X-Frame-Options: "'DENY'"
   htmlSecurityHeaders: &htmlSecurityHeaders
     # The below content security policy allows any content hosted on this API, and the GOV.UK-provided inline script
     # that hashes to the specified value.
     # Hash of additional styles on /error page
-    method.response.header.Content-Security-Policy: "'default-src 'self'; script-src 'self' 'sha256-M80RLcRm48jnTp96aiGlbLYaHFV91XCjJpgYgPmCrZk='; style-src 'self' 'sha256-OSQZaptXMv+LtEfDx7ttZqxVa9cWe2GRD1cJLlMxqUg=''"
+    method.response.header.Content-Security-Policy: "'default-src 'self'; script-src 'self' 'sha256-M80RLcRm48jnTp96aiGlbLYaHFV91XCjJpgYgPmCrZk='; style-src 'self' 'sha256-OSQZaptXMv+LtEfDx7ttZqxVa9cWe2GRD1cJLlMxqUg='; connect-src 'self'; frame-ancestors 'none'; form-action 'none''"
     method.response.header.Referrer-Policy: "'no-referrer'"
 
 # Reusable OpenAPI components. See https://swagger.io/docs/specification/components/ for more detail.
@@ -28,6 +28,7 @@ components:
       properties:
         keys:
           type: array
+          maxItems: 10
           items:
             anyOf:
               - $ref: "#/components/schemas/EllipticCurveJwk"
@@ -741,7 +742,7 @@ paths:
                 token_exchange:
                   value:
                     {
-                      "access_token": "aGVhZGVy.a2V5.aXY.Y2lwaGVydGV4dA.dGFn",
+                      "access_token": "header.key.iv.ciphertext.tag",
                       "issued_token_type": "urn:ietf:params:oauth:token-type:access_token",
                       "token_type": "Bearer",
                       "expires_in": 180
