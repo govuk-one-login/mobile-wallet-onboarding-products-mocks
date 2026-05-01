@@ -81,7 +81,7 @@ Resources:
         skip:
           - id: CKV_AWS_120
             rule: Ensure API Gateway caching is enabled
-            comment: Caching is not required foir this API Gateway, and skiping this will save costs.
+            comment: Caching is not required for this API Gateway, and skiping this rule will save caching costs.
     Properties:
       RestApiId: !Ref MockApi
       DeploymentId: !Ref MockApiDeployment
