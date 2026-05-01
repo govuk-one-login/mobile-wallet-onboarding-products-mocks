@@ -87,6 +87,9 @@ Resources:
       DeploymentId: !Ref MockApiDeployment
       StageName: !Ref Environment
       TracingEnabled: true
+      AccessLogSetting:
+        DestinationArn: !GetAtt TxmaApiGatewayAccessLogsGroup.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "path": "$context.path", "routeKey":"$context.routeKey", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
 
   CustomDomain:
     Type: AWS::ApiGateway::DomainName
@@ -127,6 +130,18 @@ Resources:
         DNSName: !GetAtt CustomDomain.RegionalDomainName
         HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
         EvaluateTargetHealth: false
+
+  TxmaApiGatewayAccessLogsGroup:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
+            comment: KMS encryption not required as log group will not contain sensitive data.
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-txma-api-gateway-access-logs
+      RetentionInDays: 14
 
 Outputs:
   TxMAMockFriendlyUrl:
