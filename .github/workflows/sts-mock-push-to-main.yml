@@ -25,6 +25,14 @@ jobs:
     with:
       working-directory: ./sts-mock
 
+  run-checkov:
+    name: Run Checkov
+    uses: bridgecrewio/checkov-action@de2bfaecd21d58ef232e0d2a3391c33c32c460d7 # v12.3096.0
+    with:
+      file: "sts-mock/template.yaml"
+      quiet: true
+      soft_fail: false
+
   deploy:
     name: Deploy
     runs-on: ubuntu-24.04
