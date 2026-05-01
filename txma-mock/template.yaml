@@ -69,6 +69,12 @@ Resources:
       RestApiId: !Ref MockApi
 
   MockApiStage:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_120
+            rule: Ensure API Gateway caching is enabled
+            comment: Caching is not required foir this API Gateway, and skiping this will save costs.
     Type: AWS::ApiGateway::Stage
     Properties:
       RestApiId: !Ref MockApi
