@@ -15,6 +15,17 @@ The SAM template is formatted using [rain](https://github.com/aws-cloudformation
 rain fmt -w template.yaml
 ```
 
+## Run Checkov
+
+We use Checkov for static analysis of our IaC. Following can be used to run a Checkov analysis locally.
+
+```bash
+brew install checkov
+
+# Running Checkov analysis
+checkov --file tmxa-mock/template.yaml
+```
+
 ## Deploying to Dev
 
 > You must be logged into the Onboarding Products `dev` AWS account.

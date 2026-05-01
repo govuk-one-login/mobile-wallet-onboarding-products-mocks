@@ -140,7 +140,7 @@ Resources:
             comment: KMS encryption not required as log group will not contain sensitive data.
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-txma-api-gateway-access-logs
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-gateway-access-logs
       RetentionInDays: 14
 
 Outputs:
