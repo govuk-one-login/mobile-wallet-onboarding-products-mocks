@@ -86,6 +86,7 @@ Resources:
       RestApiId: !Ref MockApi
       DeploymentId: !Ref MockApiDeployment
       StageName: !Ref Environment
+      TracingEnabled: true
 
   CustomDomain:
     Type: AWS::ApiGateway::DomainName
