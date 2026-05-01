@@ -39,10 +39,13 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
 
+      - name: Normalise base spec
+        run: yq eval '.' ${{ env.STS_BACK_CHECKOUT_PATH }}/${{ env.STS_BACK_OAS_PATH }} > /tmp/sts-backend-normalised.yaml
+
       - name: Check OAS for drift
         uses: oasdiff/oasdiff-action/diff@1f38ea5ea0b4a2e4e49901c3bcdf4386a05e9ea1 # v0.0.37
         with:
-          base: ${{ env.STS_BACK_CHECKOUT_PATH }}/${{ env.STS_BACK_OAS_PATH }}
+          base: /tmp/sts-backend-normalised.yaml
           revision: ${{ env.LOCAL_OAS_PATH }}
           fail-on-diff: true
 
