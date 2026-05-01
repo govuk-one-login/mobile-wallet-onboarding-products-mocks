@@ -45,6 +45,12 @@ Resources:
       PathPart: txma-event
 
   TxmaEventPostMethod:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_59
+            rule: Ensure there is no open access to back-end resources through API
+            comment: The API Gateway is set up as a mock integration, so there are no back-end resources that can be accessed through it.
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref MockApi
