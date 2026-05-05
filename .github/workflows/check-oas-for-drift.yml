@@ -48,7 +48,7 @@ jobs:
         run: yq eval 'explode(.)' ${{ env.LOCAL_OAS_PATH }} > sts-mock-normalised.yaml
 
       - name: Check OAS for drift
-        uses: oasdiff/oasdiff-action/diff@1f38ea5ea0b4a2e4e49901c3bcdf4386a05e9ea1 # v0.0.37
+        uses: oasdiff/oasdiff-action/diff@c002f996c3d084acf62ea6dd4f2e7a57b7bc2a35 # v0.0.43
         with:
           base: sts-backend-normalised.yaml
           revision: sts-mock-normalised.yaml
@@ -62,7 +62,7 @@ jobs:
     if: failure()
     steps:
       - name: Send Slack alert
-        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
+        uses: slackapi/slack-github-action@03ea5433c137af7c0495bc0cad1af10403fc800c # v3.0.2
         with:
           webhook: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
