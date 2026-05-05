@@ -46,6 +46,12 @@ Resources:
 
   TxmaEventPostMethod:
     Type: AWS::ApiGateway::Method
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_59
+            rule: Ensure there is no open access to back-end resources through API
+            comment: The API Gateway is set up as a mock integration, so there are no back-end resources that can be accessed through it.
     Properties:
       RestApiId: !Ref MockApi
       ResourceId: !Ref TxmaEventResource
@@ -70,10 +76,20 @@ Resources:
 
   MockApiStage:
     Type: AWS::ApiGateway::Stage
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_120
+            rule: Ensure API Gateway caching is enabled
+            comment: Caching is not required for this API Gateway, and skiping this rule will save caching costs.
     Properties:
       RestApiId: !Ref MockApi
       DeploymentId: !Ref MockApiDeployment
       StageName: !Ref Environment
+      TracingEnabled: true
+      AccessLogSetting:
+        DestinationArn: !GetAtt TxmaApiGatewayAccessLogsGroup.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "path": "$context.path", "routeKey":"$context.routeKey", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
 
   CustomDomain:
     Type: AWS::ApiGateway::DomainName
@@ -114,6 +130,18 @@ Resources:
         DNSName: !GetAtt CustomDomain.RegionalDomainName
         HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
         EvaluateTargetHealth: false
+
+  TxmaApiGatewayAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
+            comment: KMS encryption not required as log group will not contain sensitive data.
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-gateway-access-logs
+      RetentionInDays: 14
 
 Outputs:
   TxMAMockFriendlyUrl:

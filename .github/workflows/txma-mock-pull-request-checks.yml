@@ -42,6 +42,13 @@ jobs:
         with:
           version: 1.155.2
           use-installer: true
+      
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@de2bfaecd21d58ef232e0d2a3391c33c32c460d7 # v12.3096.0
+        with:
+          file: "txma-mock/template.yaml"
+          quiet: true
+          soft_fail: false
 
       - name: Validate SAM template
         run: sam validate --lint
