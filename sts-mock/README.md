@@ -24,7 +24,7 @@ We use Checkov for static analysis of our IaC. Following can be used to run a Ch
 brew install checkov
 
 # Running Checkov analysis
-checkov --file sts-mock/template.yaml
+checkov --file template.yaml
 ```
 ## Running Locally
 
