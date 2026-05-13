@@ -22,6 +22,12 @@ jobs:
     with:
       working-directory: ./txma-mock
 
+  run-checkov:
+    name: Run Checkov
+    uses: ./.github/workflows/run-checkov.yml
+    with:
+      file-to-scan: txma-mock/template.yaml
+
   validate-and-build-sam-template:
     name: Validate and build SAM template
     runs-on: ubuntu-24.04

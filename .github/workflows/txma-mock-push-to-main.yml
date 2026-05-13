@@ -19,6 +19,12 @@ jobs:
     with:
       working-directory: ./sts-mock
 
+  run-checkov:
+    name: Run Checkov
+    uses: ./.github/workflows/run-checkov.yml
+    with:
+      file-to-scan: txma-mock/template.yaml
+
   deploy:
     name: Deploy
     runs-on: ubuntu-24.04
