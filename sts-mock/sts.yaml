@@ -605,7 +605,7 @@ paths:
             type: string
             pattern: '^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$'
           description: |
-            Required for clients authenticating using the `attest_jwt_client_auth` authentication method. Client 
+            Required for clients authenticating using the `attest_jwt_client_auth` authentication method. Client
             authentication is only required and checked for access token requests (`grant_type` = `authorization_code`).
             Must be a valid client attestation JWT as per the [specification](https://datatracker.ietf.org/doc/draft-ietf-oauth-attestation-based-client-auth/)
         - in: header
@@ -614,9 +614,9 @@ paths:
             type: string
             pattern: '^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$'
           description: |
-            Required for clients authenticating using the `attest_jwt_client_auth` authentication method. Client 
+            Required for clients authenticating using the `attest_jwt_client_auth` authentication method. Client
             authentication is only required and checked for access token requests (`grant_type` = `authorization_code`).
-            Must be a valid proof of possession JWT verifiable using the JWK embedded in the client attestation, as per 
+            Must be a valid proof of possession JWT verifiable using the JWK embedded in the client attestation, as per
             the [specification](https://datatracker.ietf.org/doc/draft-ietf-oauth-attestation-based-client-auth/)
         - in: header
           name: DPoP
@@ -784,7 +784,7 @@ paths:
                   id_token:
                     type: string
                     description: |
-                      The ID token value contains authentication information pertaining to the logged in user, as an STS signed JWT. 
+                      The ID token value contains authentication information pertaining to the logged in user, as an STS signed JWT.
                       This is only returned if the client requested the `openid` scope during authorization.
                   refresh_token:
                     type: string

@@ -1,0 +1,47 @@
+  repos:
+    - repo: https://github.com/compilerla/conventional-pre-commit
+      rev: v4.4.0
+      hooks:
+        - id: conventional-pre-commit
+          stages: [commit-msg]
+          args: [feat, fix, chore, docs, style, refactor, test, build, ci, perf, revert]
+
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v6.0.0
+      hooks:
+        - id: check-case-conflict
+        - id: check-merge-conflict
+        - id: end-of-file-fixer
+        - id: mixed-line-ending
+        - id: trailing-whitespace
+
+    - repo: https://github.com/bridgecrewio/checkov.git
+      rev: 3.2.529
+      hooks:
+        - id: checkov
+          verbose: true
+          args: [ --soft-fail ]
+          files: ^sts-mock/template\.yaml$
+
+        - id: checkov
+          verbose: true
+          args: [ --soft-fail ]
+          files: ^txma-mock/template\.yaml$
+
+    - repo: https://github.com/aws-cloudformation/cfn-lint
+      rev: v1.51.0
+      hooks:
+        - id: cfn-lint-rc
+          files: ^sts-mock/template\.yaml$
+
+        - id: cfn-lint-rc
+          files: ^txma-mock/template\.yaml$
+
+    - repo: https://github.com/aws-cloudformation/rain
+      rev: v1.24.4
+      hooks:
+        - id: rain-format
+          files: ^sts-mock/template\.yaml$
+
+        - id: rain-format
+          files: ^txma-mock/template\.yaml$

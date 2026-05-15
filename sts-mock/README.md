@@ -13,21 +13,16 @@ Imposter for OpenAPI-based mocking, Docker for containerisation, deployed to AWS
 ## Prerequisites
 
 - [Docker](https://www.docker.com)
-- [rain](https://github.com/aws-cloudformation/rain) — used to format SAM templates
-- [Checkov](https://www.checkov.io) — used for IaC static analysis (`brew install checkov`)
+- [Pre-commit](https://pre-commit.com/) — see [root README](../README.md) for setup
 
 ## Set up locally
 
-The SAM template is formatted using rain. To format `template.yaml`:
+### Running checks manually
 
 ```bash
-rain fmt -w template.yaml
-```
-
-To run Checkov static analysis on the SAM template:
-
-```bash
-checkov --file template.yaml
+pre-commit run checkov --files sts-mock/template.yaml
+pre-commit run rain-format --files sts-mock/template.yaml
+pre-commit run cfn-lint-rc --files sts-mock/template.yaml
 ```
 
 ### Run
