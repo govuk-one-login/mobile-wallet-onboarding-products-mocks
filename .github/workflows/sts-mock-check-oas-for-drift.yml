@@ -1,4 +1,4 @@
-name: Check OAS for Drift
+name: STS Mock - Check OAS for Drift
 on:
   schedule:
     # runs at midnight every day
