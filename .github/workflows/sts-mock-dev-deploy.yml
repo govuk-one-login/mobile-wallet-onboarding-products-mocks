@@ -1,4 +1,4 @@
-name: STS Mock - Manual Deployment to Dev
+name: STS Mock - Deploy to Dev
 
 on:
   workflow_dispatch:
