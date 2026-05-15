@@ -4,6 +4,8 @@
 
 Mock of STS (Security Token Service) built using [Imposter](https://www.imposter.sh). The mock server is generated from the OpenAPI specs defined in `sts.yaml` and `healthcheck.yaml`.
 
+Most endpoints serve responses directly from the examples defined in `sts.yaml`. The exception is `POST /token`, whose response is handled by `token.groovy`. The script inspects the `grant_type` in the request body and returns the appropriate spec example response for each flow (`authorization_code`, `token-exchange`, `refresh_token`). For the `pre-authorized_code` flow, it builds a dynamic access token.
+
 ## Tech stack
 
 Imposter for OpenAPI-based mocking, Docker for containerisation, deployed to AWS ECS Fargate behind API Gateway, with infrastructure managed via AWS SAM.
@@ -47,10 +49,6 @@ To run with environment variable overrides, copy `.env.example` to `.env`, edit 
 ```bash
 docker run -p 9090:8080 --env-file .env sts-mock
 ```
-
-## Endpoints
-
-Most endpoints serve responses directly from the examples defined in `sts.yaml`. The exception is `POST /token`, whose response is handled by `token.groovy`. The script inspects the `grant_type` in the request body and returns the appropriate spec example response for each flow (`authorization_code`, `token-exchange`, `refresh_token`). For the `pre-authorized_code` flow, it builds a dynamic access token.
 
 ## Deploy
 
