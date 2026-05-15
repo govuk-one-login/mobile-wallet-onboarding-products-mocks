@@ -1,39 +1,34 @@
-# TxMA Event Mock
+# TxMA Mock
 
-A mock of the Mobile Platform `POST /txma-event` endpoint. Built using API Gateway's mock integration, it accepts any request body and always returns `200 OK`.
+## Overview
+
+Mock of the Mobile Platform `POST /txma-event` endpoint. Accepts any request body and always returns `200 OK` using [API Gateway mock integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-mock-integration.html).
+
+## Tech stack
+
+API Gateway mock integration with infrastructure managed via AWS SAM.
 
 ## Prerequisites
 
-- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-- [rain](https://github.com/aws-cloudformation/rain)
+- [rain](https://github.com/aws-cloudformation/rain) — used to format SAM templates
+- [Checkov](https://www.checkov.io) — used for IaC static analysis (`brew install checkov`)
 
-## SAM Template Formatting
+## Set up locally
 
-The SAM template is formatted using [rain](https://github.com/aws-cloudformation/rain). To format `template.yaml`:
+The SAM template is formatted using rain. To format `template.yaml`:
 
 ```bash
 rain fmt -w template.yaml
 ```
 
-## Run Checkov
-
-We use Checkov for static analysis of our IaC. Following can be used to run a Checkov analysis locally.
+To run Checkov static analysis on the SAM template:
 
 ```bash
-brew install checkov
-
-# Running Checkov analysis
 checkov --file template.yaml
 ```
 
-## Deploying to Dev
+## Deploy
 
-> You must be logged into the Onboarding Products `dev` AWS account.
+This service is deployed via GitHub Actions.
 
-Deploy a custom stack to the `dev` account with:
-
-```bash
-sam build && sam deploy --guided
-```
-
-test
+Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
