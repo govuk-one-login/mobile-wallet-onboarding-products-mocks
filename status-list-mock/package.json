@@ -1,0 +1,56 @@
+{
+  "name": "status-list-mock",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": "24"
+  },
+  "scripts": {
+    "build": "sam build --template template.yaml",
+    "dev": "npm run localstack:up && npm run invoke:JwksFunction && npm run start:api",
+    "checkov": "checkov --file ./template.yaml",
+    "format": "./node_modules/.bin/prettier --write '**/*.ts' 'openApiSpec/mock/api-spec.yaml'",
+    "lint": "./node_modules/.bin/eslint ./src/functions",
+    "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",
+    "infra:format": "rain fmt --write template.yaml",
+    "infra:format:check": "rain fmt --verify template.yaml",
+    "invoke:JwksFunction": "sam local invoke JwksFunction --template .aws-sam/build/template.yaml --env-vars .env.json",
+    "localstack:down": "docker compose -f localstack/docker-compose.yml down",
+    "localstack:up": "docker compose -f localstack/docker-compose.yml up --build -d --wait",
+    "start:api": "sam local start-api --template .aws-sam/build/template.yaml --warm-containers EAGER --env-vars .env.json --port 3000",
+    "test": "./node_modules/.bin/jest --silent",
+    "test:conformance:local": "./node_modules/.bin/jest --config jest.conformance.config.ts --testPathPatterns='runners/local'",
+    "test:conformance:ci": "./node_modules/.bin/jest --config jest.conformance.config.ts --testPathPatterns='runners/ci'"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stoplight/prism-cli": "^5.15.10",
+    "@types/aws-lambda": "^8.10.161",
+    "@types/jest": "^30.0.0",
+    "aws-sdk-client-mock": "^4.1.0",
+    "aws-sdk-client-mock-jest": "^4.1.0",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.3.0",
+    "jest-junit": "^17.0.0",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.1"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.33.0",
+    "@aws-sdk/client-kms": "^3.1041.0",
+    "@aws-sdk/client-s3": "^3.1041.0",
+    "ecdsa-sig-formatter": "^1.0.11",
+    "esbuild": "^0.28.0",
+    "tsc": "^2.0.4"
+  },
+  "overrides": {
+    "lodash": "4.18.0",
+    "uuid": "14.0.0",
+    "@tootallnate/once": "3.0.1"
+  }
+}
