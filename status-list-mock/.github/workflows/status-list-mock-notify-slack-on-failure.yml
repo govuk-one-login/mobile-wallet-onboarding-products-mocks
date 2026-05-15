@@ -1,0 +1,22 @@
+name: Status List Mock - Notify Slack on Failure
+
+on:
+  workflow_call:
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - name: Send Slack alert
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        with:
+          webhook: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            "repository": "${{ github.repository }}"
+            "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
