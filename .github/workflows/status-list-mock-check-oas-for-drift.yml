@@ -1,4 +1,4 @@
-name: Status List Mock Check OAS for Drift
+name: Status List Mock - Check OAS for Drift
 on:
   schedule:
     # runs at midnight every day
@@ -28,7 +28,7 @@ jobs:
       LOCAL_OAS_PATH: openApiSpec/crs/crs-private-spec.yaml
 
     steps:
-      - name: Check out Status List Mock repo
+      - name: Check out OP Mocks repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Checkout CRS repo
