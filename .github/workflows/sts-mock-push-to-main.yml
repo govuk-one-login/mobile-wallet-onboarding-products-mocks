@@ -27,11 +27,9 @@ jobs:
 
   run-checkov:
     name: Run Checkov
-    uses: bridgecrewio/checkov-action@9201a8e6eaa919e3444d7c4ca691896efde4f033 # v12.3101.0
+    uses: ./.github/workflows/run-checkov.yml
     with:
-      file: "sts-mock/template.yaml"
-      quiet: true
-      soft_fail: false
+      file-to-scan: sts-mock/template.yaml
 
   deploy:
     name: Deploy
