@@ -1,7 +1,15 @@
-name: Pre-Merge
+name: Status List Mock - Pull Request Checks
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+    paths:
+      - status-list-mock/**
+      - .github/workflows/status-list-mock-pull-request-checks.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -24,7 +32,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version-file: .nvmrc
+          node-version-file: status-list-mock/.nvmrc
           cache: npm
           cache-dependency-path: package-lock.json
 
@@ -39,13 +47,6 @@ jobs:
 
       - name: Run unit tests
         run: npm run test
-      
-      - name: Run Checkov
-        uses: bridgecrewio/checkov-action@9201a8e6eaa919e3444d7c4ca691896efde4f033 # v12.3101.0
-        with:
-          file: "./template.yaml"
-          quiet: true
-          soft_fail: false
 
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
@@ -77,9 +78,15 @@ jobs:
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
 
+  run-checkov:
+    name: Run Checkov
+    uses: ./.github/workflows/run-checkov.yml
+    with:
+      file-to-scan: status-list--mock/template.yaml
+
   check-oas-for-drift:
     name: Check Status List OAS for drift
-    uses: ./.github/workflows/check-oas-for-drift.yml
+    uses: status-list-mock-check-oas-for-drift.yml
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     secrets:
       WALLET_CRS_DEPLOY_KEY: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
