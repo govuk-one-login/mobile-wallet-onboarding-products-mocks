@@ -1,32 +1,36 @@
 # STS Mock
 
-Mock of STS (Security Token Service) built using [Imposter](https://www.imposter.sh). The mock server is generated from the OpenAPI 
-specs defined in `sts.yaml` and `healthcheck.yaml`.
+## Overview
+
+Mock of STS (Security Token Service) built using [Imposter](https://www.imposter.sh). The mock server is generated from the OpenAPI specs defined in `sts.yaml` and `healthcheck.yaml`.
+
+Most endpoints serve responses directly from the examples defined in `sts.yaml`. The exception is `POST /token`, whose response is handled by `token.groovy`. The script inspects the `grant_type` in the request body and returns the appropriate spec example response for each flow (`authorization_code`, `token-exchange`, `refresh_token`). For the `pre-authorized_code` flow, it builds a dynamic access token.
+
+## Tech stack
+
+Imposter for OpenAPI-based mocking, Docker for containerisation, deployed to AWS ECS Fargate behind API Gateway, with infrastructure managed via AWS SAM.
 
 ## Prerequisites
 
 - [Docker](https://www.docker.com)
-- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-- [rain](https://github.com/aws-cloudformation/rain)
+- [rain](https://github.com/aws-cloudformation/rain) — used to format SAM templates
+- [Checkov](https://www.checkov.io) — used for IaC static analysis (`brew install checkov`)
 
-## SAM Template Formatting
+## Set up locally
 
-The SAM template is formatted using [rain](https://github.com/aws-cloudformation/rain). To format `template.yaml`:
+The SAM template is formatted using rain. To format `template.yaml`:
 
 ```bash
 rain fmt -w template.yaml
 ```
-## Run Checkov
 
-We use Checkov for static analysis of our IaC. Following can be used to run a Checkov analysis locally.
+To run Checkov static analysis on the SAM template:
 
 ```bash
-brew install checkov
-
-# Running Checkov analysis
 checkov --file template.yaml
 ```
-## Running Locally
+
+### Run
 
 Build the Docker image:
 
@@ -40,48 +44,24 @@ Run the container:
 docker run -p 9090:8080 sts-mock
 ```
 
-To run the container with environment variable overrides (e.g., for local development), you can use a `.env` file:
-
-1. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Edit `.env` to set your desired values.
-3. Run the container with the `--env-file` flag:
-   ```bash
-   docker run -p 9090:8080 --env-file .env sts-mock
-   ```
-
-Alternatively, you can pass environment variables directly:
+To run with environment variable overrides, copy `.env.example` to `.env`, edit as needed, then:
 
 ```bash
-docker run -p 9090:8080 \
-  -e SELF_URL=http://localhost:9090 \
-  -e CREDENTIAL_ISSUER_URL=http://localhost:8080 \
-  sts-mock
+docker run -p 9090:8080 --env-file .env sts-mock
 ```
 
-## Deploying to Dev
+## Deploy
 
-> You must be logged into the Onboarding Products `dev` AWS account.
+This service is deployed via GitHub Actions.
 
-To deploy a custom stack to the `dev` account, build and push the STS mock Docker image to ECR:
+Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
 
-```bash
-./build-and-deploy-image.sh <image-tag> <aws-profile>
-```
+## CI checks
 
-Then deploy the stack:
+### OpenAPI spec sync
 
-```bash
-sam build && sam deploy --guided
-```
+The `check-oas-for-drift` workflow ensures the OpenAPI spec in this repo stays in sync with `sts-back`.
 
-### Open API Specification (OAS) Drift Detection
+It clones `sts-back` and uses [oasdiff](https://github.com/oasdiff/oasdiff) to compare the specs. If differences are found, the workflow fails and a notification is sent to the OP Slack channel.
 
-The `check-oas-for-drift` workflow clones the `sts-back` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff)
-to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a
-notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating
-`sts.yaml` to reflect the upstream changes.
-
-test
+When this happens, update `sts.yaml` to reflect the upstream changes.
