@@ -30,3 +30,22 @@ updates:
       prefix: chore
     cooldown:
       default-days: 7
+  - package-ecosystem: "npm"
+    directory: "/status-list-mock"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      npm-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
