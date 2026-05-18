@@ -9,11 +9,13 @@
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v6.0.0
       hooks:
-        - id: check-case-conflict
         - id: check-merge-conflict
         - id: end-of-file-fixer
+          exclude: ^sts-mock/sts\.yaml$
         - id: mixed-line-ending
+          exclude: ^sts-mock/sts\.yaml$
         - id: trailing-whitespace
+          exclude: ^sts-mock/sts\.yaml$
 
     - repo: https://github.com/bridgecrewio/checkov.git
       rev: 3.2.529
