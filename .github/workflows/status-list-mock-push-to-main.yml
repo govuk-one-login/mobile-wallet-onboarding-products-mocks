@@ -61,6 +61,7 @@ jobs:
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
         with:
+          projectBaseDir: ./status-list-mock
           version: 1.132.0
           use-installer: true
 
