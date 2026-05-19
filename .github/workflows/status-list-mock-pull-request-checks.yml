@@ -86,7 +86,7 @@ jobs:
 
   check-oas-for-drift:
     name: Check Status List OAS for drift
-    uses: status-list-mock-check-oas-for-drift.yml
+    uses: check-oas-for-drift.yml
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     secrets:
       WALLET_CRS_DEPLOY_KEY: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
