@@ -1,4 +1,37 @@
 {
   "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.1.0/schemas/schema.json",
-  "services": []
+  "services": [
+    {
+      "service-tag": "status-list-mock",
+      "quality-gates": [
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
+            "path": "jobs.ci"
+          },
+          "check-types": [
+            "code style and linting"
+          ]
+        },
+        {
+          "phase": "pre-upload",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/status-list-mock-push-to-main.yml",
+            "path": "jobs.run-code-analysis"
+          },
+          "check-types": [
+            "code style and linting",
+            "unit",
+            "unit test coverage",
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"
+          ]
+        }
+      ]
+    }
+  ]
 }
