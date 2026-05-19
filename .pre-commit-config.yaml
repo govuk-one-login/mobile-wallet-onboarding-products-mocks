@@ -11,7 +11,6 @@
       hooks:
         - id: check-json
         - id: check-merge-conflict
-          exclude: ^sts-mock/sts\.yaml$
         - id: check-yaml
           exclude: ^sts-mock/sts\.yaml$
         - id: end-of-file-fixer
