@@ -22,12 +22,10 @@
       hooks:
         - id: checkov
           verbose: true
-          args: [ --soft-fail ]
           files: ^sts-mock/template\.yaml$
 
         - id: checkov
           verbose: true
-          args: [ --soft-fail ]
           files: ^txma-mock/template\.yaml$
 
     - repo: https://github.com/aws-cloudformation/cfn-lint
