@@ -9,7 +9,11 @@
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v6.0.0
       hooks:
+        - id: check-json
         - id: check-merge-conflict
+          exclude: ^sts-mock/sts\.yaml$
+        - id: check-yaml
+          exclude: ^sts-mock/sts\.yaml$
         - id: end-of-file-fixer
           exclude: ^sts-mock/sts\.yaml$
         - id: mixed-line-ending
