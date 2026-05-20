@@ -19,12 +19,6 @@ jobs:
     with:
       working-directory: ./status-list-mock
 
-  validate-docker-image:
-    name: Validate Docker image
-    uses: ./.github/workflows/validate-docker-image.yml
-    with:
-      working-directory: ./status-list-mock
-
   run-checkov:
     name: Run Checkov
     uses: ./.github/workflows/run-checkov.yml
@@ -35,7 +29,6 @@ jobs:
     name: Deploy
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    needs: [validate-docker-image]
     permissions:
       id-token: write
       contents: read
@@ -66,6 +59,16 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectBaseDir: ./status-list-mock
+
+      - name: SonarQube Quality Gate check
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
+        timeout-minutes: 15
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: status-list-mock/.scannerwork/report-task.txt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
