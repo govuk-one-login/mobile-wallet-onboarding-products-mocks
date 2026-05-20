@@ -50,6 +50,6 @@ jobs:
     name: Notify Slack on Failure
     needs: [ check-oas-for-drift ]
     if: failure()
-    uses: ./.github/workflows/status-list-mock-notify-slack-on-failure.yml
+    uses: ./.github/workflows/notify-slack-on-failure.yml
     secrets:
       GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}

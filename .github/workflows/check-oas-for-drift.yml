@@ -56,16 +56,8 @@ jobs:
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
-    runs-on: ubuntu-24.04
     needs: [ check-oas-for-drift ]
-    permissions: {}
     if: failure()
-    steps:
-      - name: Send Slack alert
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
-        with:
-          webhook: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            "repository": "${{ github.repository }}"
-            "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    uses: ./.github/workflows/notify-slack-on-failure.yml
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
