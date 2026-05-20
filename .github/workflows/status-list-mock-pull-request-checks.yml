@@ -44,7 +44,7 @@ jobs:
         with:
           node-version-file: status-list-mock/.nvmrc
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: status-list-mock/package-lock.json
 
       - name: Install dependencies
         run: npm ci
