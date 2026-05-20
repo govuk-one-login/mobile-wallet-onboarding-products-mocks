@@ -11,6 +11,7 @@
     "checkov": "checkov --file ./template.yaml",
     "format": "./node_modules/.bin/prettier --write '**/*.ts' 'openApiSpec/mock/api-spec.yaml'",
     "lint": "./node_modules/.bin/eslint ./src/functions",
+    "lint:fix": "eslint . --fix",
     "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",
     "infra:format": "rain fmt --write template.yaml",
     "infra:format:check": "rain fmt --verify template.yaml",
