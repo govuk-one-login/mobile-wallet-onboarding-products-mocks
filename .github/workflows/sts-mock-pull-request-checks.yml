@@ -63,7 +63,7 @@ jobs:
 
   check-oas-for-drift:
     name: Check STS Back OAS for drift
-    uses: sts-check-oas-for-drift.yml
+    uses: sts-mock-check-oas-for-drift.yml
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     secrets:
       WALLET_STS_BACK_DEPLOY_KEY: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
