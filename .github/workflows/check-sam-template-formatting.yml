@@ -22,7 +22,7 @@ jobs:
 
       - name: Install Rain
         env:
-          VERSION: v1.24.3
+          VERSION: v1.24.4
           ARCH: linux-amd64
         run: |
           wget -q "https://github.com/aws-cloudformation/rain/releases/download/${VERSION}/rain-${VERSION}_${ARCH}.zip"
