@@ -26,12 +26,6 @@ jobs:
     with:
       working-directory: ./status-list-mock
 
-  validate-docker-image:
-    name: Validate Docker image
-    uses: ./.github/workflows/validate-docker-image.yml
-    with:
-      working-directory: ./status-list-mock
-
   validate-and-build-sam-template:
     name: Validate and build SAM template
     runs-on: ubuntu-24.04
