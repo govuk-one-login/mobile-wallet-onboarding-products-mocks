@@ -1,6 +1,6 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import eslintConfigPrettier from 'eslint-config-prettier'
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -9,14 +9,14 @@ export default tseslint.config(
   {
     rules: {
       // Turn off base ESLint rule to avoid conflicts with TypeScript version
-      'no-unused-vars': 'off',
+      "no-unused-vars": "off",
       // Use TypeScript-aware unused variables rule instead
-      '@typescript-eslint/no-unused-vars': [
-        'error',
+      "@typescript-eslint/no-unused-vars": [
+        "error",
         {
-          argsIgnorePattern: '^_' // Allow unused params prefixed with underscore (e.g., _context)
-        }
-      ]
-    }
-  }
+          argsIgnorePattern: "^_", // Allow unused params prefixed with underscore (e.g., _context)
+        },
+      ],
+    },
+  },
 );

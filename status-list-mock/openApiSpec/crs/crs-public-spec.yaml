@@ -17,13 +17,13 @@ paths:
           required: true
           description: "Unique name representing the specific status list"
       responses:
-        '200':
+        "200":
           description: "OK"
           content:
             application/statuslist+jwt:
               schema:
-                $ref: '#/components/schemas/TokenStatusListResponse'
-        '404':
+                $ref: "#/components/schemas/TokenStatusListResponse"
+        "404":
           description: Not Found
           content:
             application/json:
@@ -32,7 +32,7 @@ paths:
               example:
                 error: NOT_FOUND
                 error_description: "Status List not found for endpoint uri"
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:

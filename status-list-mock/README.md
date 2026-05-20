@@ -57,19 +57,19 @@ npm run build
 
 Copy `.env.json.example` to `.env.json`. This is your local environment configuration file.
 
-*N.B.* Ensure Docker daemon is running first.
+_N.B._ Ensure Docker daemon is running first.
 
 ```
 npm run dev
 ```
 
 This command will:
+
 - Start LocalStack.
 - Invoke the JwksFunction Lambda function.
 - Run the JwksFunction, InvokeFunction and RevokeFunction Lambda functions locally to test through a local HTTP server host.
 
 The status list mock will be available at http://localhost:3000.
-
 
 #### Accessing S3 Resources Locally
 
@@ -89,8 +89,8 @@ Replace `{id}` with the actual token ID (e.g., `81d8809a-79c3-45b3-9fa1-4108c49f
 
 ## Further Documentation
 
-| Document | Description |
-|---|---|
+| Document                                           | Description                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
 | [`docs/infrastructure.md`](docs/infrastructure.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
 
 ## OpenAPI Specifications
@@ -108,12 +108,11 @@ does not drift from the real service, copies of the CRS specs are kept here and 
 two ways:
 
 1. **Drift detection** — the private spec is checked against the upstream source daily and on every PR
-2. **Conformance testing** — both specs are used by Prism to enforce the OAS contract against the running service. 
+2. **Conformance testing** — both specs are used by Prism to enforce the OAS contract against the running service.
 
 For more information see [test/conformance/README.md](test/conformance/README.md)
 
-
-The `check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff) 
-to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a 
-notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating 
+The `check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff)
+to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a
+notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating
 `openApiSpec/crs/crs-private-spec.yaml` to reflect the upstream changes.

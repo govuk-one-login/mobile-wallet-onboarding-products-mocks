@@ -1,6 +1,6 @@
 # Mock Status List Infrastructure
 
-This service is a serverless mock of a credential status list, deployed to AWS (eu-west-2) via AWS SAM. 
+This service is a serverless mock of a credential status list, deployed to AWS (eu-west-2) via AWS SAM.
 
 All compute runs inside a VPC on private subnets. KMS holds the signing key; the private key material never leaves KMS.
 

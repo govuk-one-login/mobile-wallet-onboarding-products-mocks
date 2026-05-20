@@ -21,7 +21,7 @@ enforcement — no spec logic is duplicated in the tests.
 test/conformance/
   helpers/                      Wait for port utility
   testSuits/                    Factory functions, add test cases here
-  runners/                      Config and runtime setup 
+  runners/                      Config and runtime setup
     ci/                         Runs against deployed service (UPSTREAM_URL)
     local/                      Runs against locally running service (localhost:3000)
 ```
@@ -32,15 +32,14 @@ shared between local and CI runners.
 
 ## Test suites
 
-| Suite | Spec | Port | Covers |
-|---|---|---|---|
-| `issueConformanceSuite.ts` | `crs-private-spec.yaml` | 4010 | `POST /issue` — Content-Type enforcement, 200 response schema |
+| Suite                       | Spec                    | Port | Covers                                                         |
+| --------------------------- | ----------------------- | ---- | -------------------------------------------------------------- |
+| `issueConformanceSuite.ts`  | `crs-private-spec.yaml` | 4010 | `POST /issue` — Content-Type enforcement, 200 response schema  |
 | `revokeConformanceSuite.ts` | `crs-private-spec.yaml` | 4010 | `POST /revoke` — Content-Type enforcement, 202 response schema |
-| `publicConformanceSuite.ts` | `crs-public-spec.yaml` | 4011 | `GET /t/{id}` — response Content-Type, schema validation |
+| `publicConformanceSuite.ts` | `crs-public-spec.yaml`  | 4011 | `GET /t/{id}` — response Content-Type, schema validation       |
 
 The private spec suites share port 4010 and run serially (`maxWorkers: 1` in
-`jest.conformance.config.ts`) to avoid port conflicts. The public spec suite uses port
-4011.
+`jest.conformance.config.ts`) to avoid port conflicts. The public spec suite uses port 4011.
 
 ## Running locally
 
@@ -105,7 +104,6 @@ A Slack alert is sent to the OP channel on failure. The cause will be one of:
 - **Prism failed to start** — upstream unreachable. Verify the deployment completed and `UPSTREAM_URL` is correct.
 
 If `check-oas-for-drift` has also failed, update the spec copy first — the two failures are likely related.
-
 
 ## Known gaps
 
