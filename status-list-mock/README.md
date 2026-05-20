@@ -65,8 +65,6 @@ npm run dev
 
 The status list mock will be available at http://localhost:3000.
 
-Running locally also requires the example credential issuer for end-to-end journey functionality.
-
 ### Test
 
 ```bash
