@@ -13,7 +13,10 @@ describe("getLocalStackAwsClientConfig", () => {
 
     expect(config).toEqual({
       endpoint: LOCALSTACK_ENDPOINT,
-      credentials: {},
+      credentials: {
+        accessKeyId: "test",
+        secretAccessKey: "test",
+      },
       region: AWS_REGION,
     });
   });
