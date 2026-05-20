@@ -20,7 +20,7 @@ paths:
                   - alg: (string) Algorithm used for signing the JWT ("ES256")
                   - typ: (string) Type of the token ("JWT")
                   - kid: (string) Key ID used to identify the signing key in the credential issuer JWKS endpoint
-                Required payload claims: 
+                Required payload claims:
                   - iss: (string) Must match a known clientId
                   - iat: (number) (unix timestamp) JWT issued at time
                   - statusExpiry: (number) (unix timestamp) Date the issued credential expires
@@ -69,7 +69,7 @@ paths:
                   - alg: (string) Algorithm used for signing the JWT ("ES256")
                   - typ: (string) Type of the token ("JWT")
                   - kid: (string) Key ID used to identify the signing key in the credential issuer JWKS endpoint
-                Required payload claims: 
+                Required payload claims:
                   - iss: (string) Must match a known clientId
                   - iat: (number) (unix timestamp) JWT issued at time
                   - idx: (number) The index to revoke
@@ -138,7 +138,7 @@ paths:
                     - alg: (string) Algorithm used for signing the JWT ("ES256")
                     - typ: (string) Type of the token ("statuslist+jwt")
                     - kid: (string) Key ID used to identify the signing key in the status list JWKS endpoint
-                  Required payload claims: 
+                  Required payload claims:
                     - iss: (string) Status list URL
                     - iat: (number) (unix timestamp) JWT issued at time
                     - exp: (number) (unix timestamp) JWT expiration time (iat + ttl)
