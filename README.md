@@ -16,6 +16,10 @@ Ensure your branch is up to date and all hooks pass before opening a pull reques
 ### Installation
 
 ```bash
+brew install rain
+```
+
+```bash
 brew install pre-commit
 ```
 
