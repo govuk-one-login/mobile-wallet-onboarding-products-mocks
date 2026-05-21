@@ -90,31 +90,31 @@ Globals:
         ENVIRONMENT: !Sub ${Environment}
         SIGNING_KEY_ID: !Ref SigningKey
         DT_CONNECTION_AUTH_TOKEN: !Sub
-          - "{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}"
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
           - SecretArn: !FindInMap
               - EnvironmentVariables
               - !Ref Environment
               - DynatraceSecretArn
         DT_CONNECTION_BASE_URL: !Sub
-          - "{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}"
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
           - SecretArn: !FindInMap
               - EnvironmentVariables
               - !Ref Environment
               - DynatraceSecretArn
         DT_CLUSTER_ID: !Sub
-          - "{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}"
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
           - SecretArn: !FindInMap
               - EnvironmentVariables
               - !Ref Environment
               - DynatraceSecretArn
         DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
-          - "{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}"
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
           - SecretArn: !FindInMap
               - EnvironmentVariables
               - !Ref Environment
               - DynatraceSecretArn
         DT_TENANT: !Sub
-          - "{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}"
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
           - SecretArn: !FindInMap
               - EnvironmentVariables
               - !Ref Environment
@@ -145,7 +145,7 @@ Resources:
       MethodSettings:
         - LoggingLevel: INFO
           ResourcePath: /*
-          HttpMethod: "*"
+          HttpMethod: '*'
           DataTraceEnabled: false
           MetricsEnabled: true
           ThrottlingBurstLimit: 10
@@ -185,7 +185,7 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
-      RegionalCertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+      RegionalCertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
       SecurityPolicy: TLS_1_2
 
   ApiRecordSet:
@@ -194,7 +194,7 @@ Resources:
       AliasTarget:
         DNSName: !GetAtt ApiDomainName.RegionalDomainName
         HostedZoneId: !GetAtt ApiDomainName.RegionalHostedZoneId
-      HostedZoneId: !Sub "{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}"
+      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
       Name: !Ref ApiDomainName
       Type: A
 
@@ -305,7 +305,7 @@ Resources:
                   - ec2:DescribeNetworkInterfaces
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
-                Resource: "*"
+                Resource: '*'
                 Condition:
                   StringEquals:
                     aws:CalledViaLast: lambda.amazonaws.com
@@ -433,7 +433,7 @@ Resources:
                   - ec2:DescribeNetworkInterfaces
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
-                Resource: "*"
+                Resource: '*'
                 Condition:
                   StringEquals:
                     aws:CalledViaLast: lambda.amazonaws.com
@@ -561,7 +561,7 @@ Resources:
                   - ec2:DescribeNetworkInterfaces
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
-                Resource: "*"
+                Resource: '*'
                 Condition:
                   StringEquals:
                     aws:CalledViaLast: lambda.amazonaws.com
@@ -606,8 +606,8 @@ Resources:
         Statement:
           - Effect: Deny
             Principal:
-              AWS: "*"
-            Action: "*"
+              AWS: '*'
+            Action: '*'
             Resource: !Sub
               - arn:aws:s3:::${bucketName}/*
               - bucketName: !Ref JwksBucket
@@ -683,8 +683,8 @@ Resources:
         Statement:
           - Effect: Deny
             Principal:
-              AWS: "*"
-            Action: "*"
+              AWS: '*'
+            Action: '*'
             Resource: !Sub
               - arn:aws:s3:::${bucketName}/*
               - bucketName: !Ref StatusListBucket
@@ -733,7 +733,7 @@ Resources:
             Principal:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
             Action: kms:*
-            Resource: "*"
+            Resource: '*'
 
   SigningKeyAlias:
     Type: AWS::KMS::Alias
