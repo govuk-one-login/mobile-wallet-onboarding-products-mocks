@@ -2,7 +2,7 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
 
-export default tseslint.config([
+const configs = [
   eslint.configs.recommended,
   tseslint.configs.recommended,
   eslintConfigPrettier, // Disables ESLint rules that conflict with Prettier
@@ -19,4 +19,6 @@ export default tseslint.config([
       ],
     },
   },
-]);
+];
+
+export default tseslint.config(configs);
