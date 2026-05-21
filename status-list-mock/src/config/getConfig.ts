@@ -17,7 +17,7 @@ export function getConfig<T extends keyof Config>(
 
   const config: Partial<Config> = {};
   for (const field of requiredFields) {
-    config[field] = env[field] as string;
+    config[field] = env[field];
   }
 
   return config as Pick<Config, T>;
