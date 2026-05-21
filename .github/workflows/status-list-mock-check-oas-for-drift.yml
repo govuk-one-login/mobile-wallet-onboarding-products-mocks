@@ -23,9 +23,9 @@ jobs:
     permissions:
       contents: read
     env:
-      CRS_CHECKOUT_PATH: crs-backend
+      CRS_CHECKOUT_PATH: status-list-mock/crs-backend
       CRS_OAS_PATH: backend/openApiSpecs/crs-private-spec.yaml
-      LOCAL_OAS_PATH: openApiSpec/crs/crs-private-spec.yaml
+      LOCAL_OAS_PATH: status-list-mock/openApiSpec/crs/crs-private-spec.yaml
 
     steps:
       - name: Check out OP Mocks repo
