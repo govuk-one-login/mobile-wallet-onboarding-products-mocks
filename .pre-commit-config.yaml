@@ -12,7 +12,7 @@
         - id: check-json
         - id: check-merge-conflict
         - id: check-yaml
-          args: ['--unsafe']
+          exclude: ^(sts-mock/sts\.yaml|status-list-mock/template\.yaml)$
         - id: end-of-file-fixer
           exclude: ^sts-mock/sts\.yaml$
         - id: mixed-line-ending
