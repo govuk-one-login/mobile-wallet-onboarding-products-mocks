@@ -33,7 +33,7 @@
 
         - id: checkov
           verbose: true
-          files: ^status-list--mock/template\.yaml$
+          files: ^status-list-mock/template\.yaml$
 
     - repo: https://github.com/aws-cloudformation/cfn-lint
       rev: v1.51.0
@@ -54,7 +54,7 @@
           files: ^txma-mock/template\.yaml$
 
         - id: rain-format
-          files: ^status-list--mock/template\.yaml$
+          files: ^status-list-mock/template\.yaml$
 
     - repo: local
       hooks:
