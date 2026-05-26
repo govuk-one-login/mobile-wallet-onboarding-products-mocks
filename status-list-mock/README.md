@@ -86,3 +86,28 @@ Automated deployments to `build` are triggered on push to `main` after PR approv
 | Document                                           | Description                                                      |
 | -------------------------------------------------- | ---------------------------------------------------------------- |
 | [`docs/infrastructure.md`](docs/infrastructure.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
+
+## OpenAPI Specifications
+
+This repo contains the following OpenAPI specs under `openApiSpec/`:
+
+- `openApiSpec/mock/api-spec.yaml` — the deployed API Gateway spec for this mock service
+- `openApiSpec/crs/crs-private-spec.yaml` — a copy of the CRS private API spec (`/issue`, `/revoke`)
+- `openApiSpec/crs/crs-public-spec.yaml` — a copy of the CRS public API spec (`/t/{id}`)
+
+### Why are the CRS specs in this repo?
+
+This mock implements the same API contract as the real CRS service. To ensure the mock
+does not drift from the real service, copies of the CRS specs are kept here and used in
+two ways:
+
+1. **Drift detection** — the private spec is checked against the upstream source daily and on every PR
+2. **Conformance testing** — both specs are used by Prism to enforce the OAS contract against the running service.
+
+For more information see [test/conformance/README.md](test/conformance/README.md)
+
+
+The `check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff)
+to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a
+notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating
+`openApiSpec/crs/crs-private-spec.yaml` to reflect the upstream changes.
