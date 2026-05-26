@@ -247,6 +247,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
+                no_body_or_headers:
+                  summary: Missing event body or headers
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No Event Body or Headers Found"
                 missing_content_type:
                   summary: Missing Content-Type header
                   value:
@@ -267,6 +272,11 @@ paths:
                   value:
                     error: "BAD_REQUEST"
                     error_description: "No jti in Payload"
+                invalid_jti:
+                  summary: Invalid jti format in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "The jti claim is not a lower case uuid string"
                 missing_status_expiry:
                   summary: Missing statusExpiry in payload
                   value:
@@ -289,51 +299,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
-                missing_kid:
-                  summary: Missing Key ID in header
+                unauthorized:
+                  summary: Authentication failure
                   value:
                     error: "UNAUTHORIZED"
-                    error_description: "No Key ID in Header"
-                invalid_kid:
-                  summary: Invalid Key ID in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "Invalid Key ID in Header"
-                missing_typ:
-                  summary: Missing typ in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "No Type in Header"
-                invalid_typ:
-                  summary: Invalid typ in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "Invalid Type in Header"
-                missing_alg:
-                  summary: Missing alg in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "No Algorithm in Header"
-                invalid_alg:
-                  summary: Invalid alg in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "Invalid Algorithm in Header"
-                missing_iss:
-                  summary: Missing iss in payload
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "No Issuer in Payload"
-                non_matching_client_id:
-                  summary: JWT has non-matching Client ID
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "JWT has non-matching Client ID"
-                non_verified_signature:
-                  summary: Non-verified signature used to sign JWT
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "JWT has non-verified signature"
+                    error_description: "Unauthorized Request"
         "409":
           description: Conflict - Concurrent idempotent request in progress
           content:
@@ -418,6 +388,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
+                no_body_or_headers:
+                  summary: Missing event body or headers
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No Event Body or Headers Found"
                 missing_content_type:
                   summary: Missing Content-Type header
                   value:
@@ -444,10 +419,10 @@ paths:
                     error: "BAD_REQUEST"
                     error_description: "No jti in Payload"
                 invalid_jti:
-                  summary: Invalid jti in payload
+                  summary: Invalid jti format in payload
                   value:
                     error: "BAD_REQUEST"
-                    error_description: "Invalid jti in Payload"
+                    error_description: "The jti claim is not a lower case uuid string"
                 missing_idx:
                   summary: Missing idx in payload
                   value:
@@ -475,56 +450,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
-                missing_kid:
-                  summary: Missing Key ID in header
+                unauthorized:
+                  summary: Authentication failure
                   value:
                     error: "UNAUTHORIZED"
-                    error_description: "No Key ID in Header"
-                invalid_kid:
-                  summary: Invalid Key ID in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "Invalid Key ID in Header"
-                missing_typ:
-                  summary: Missing typ in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "No Type in Header"
-                invalid_typ:
-                  summary: Invalid typ in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "Invalid Type in Header"
-                missing_alg:
-                  summary: Missing alg in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "No Algorithm in Header"
-                invalid_alg:
-                  summary: Invalid alg in header
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "Invalid Algorithm in Header"
-                missing_iss:
-                  summary: Missing iss in payload
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "No Issuer in Payload"
-                non_matching_client_id:
-                  summary: JWT has non-matching Client ID
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "JWT has non-matching Client ID"
-                non_verified_signature:
-                  summary: Non-verified signature used to sign JWT
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "JWT has non-verified signature"
-                client_mismatch:
-                  summary: Client ID mismatch with original issuer
-                  value:
-                    error: "UNAUTHORIZED"
-                    error_description: "The original clientId is different to the clientId in the request"
+                    error_description: "Unauthorized Request"
         "403":
           description: Forbidden
           content:
@@ -565,7 +495,7 @@ paths:
                   summary: Database update failure
                   value:
                     error: "INTERNAL_SERVER_ERROR"
-                    error_description: "Error updating revokedAt field"
+                    error_description: "Failed to update revocation status"
         "503":
           description: Service temporarily unavailable
           content:
