@@ -1,4 +1,4 @@
-name: STS Mock - Manual Deployment to Dev
+name: STS Mock - Deploy to Dev
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: read

@@ -2,10 +2,11 @@
 
 ## Project structure
 
-Code repository for mocks maintained by Wallet Onboarding Products. This project contains two modules:
+Code repository for mocks maintained by Wallet Onboarding Products. This project contains the following modules:
 
 * [`sts-mock`](./sts-mock/) - A mock of STS (Security Token Service), built using Imposter and deployed to ECS Fargate.
 * [`txma-mock`](./txma-mock/) - A mock of the Mobile Platform `POST /txma-event` endpoint, built using API Gateway's mock integration.
+* [`status-list-mock`](./status-list-mock/) - A mock implementation of the Status List service used by GOV.UK Wallet to check the current status of its stored credentials.
 
 ## Contributing
 
@@ -22,6 +23,7 @@ brew install pre-commit
 ```bash
 pre-commit install
 pre-commit install --hook-type commit-msg
+pre-commit install --hook-type pre-push
 ```
 
 ## Getting Started

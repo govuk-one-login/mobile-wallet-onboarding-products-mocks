@@ -31,6 +31,10 @@
           verbose: true
           files: ^txma-mock/template\.yaml$
 
+        - id: checkov
+          verbose: true
+          files: ^status-list-mock/template\.yaml$
+
     - repo: https://github.com/aws-cloudformation/cfn-lint
       rev: v1.51.0
       hooks:
@@ -48,3 +52,29 @@
 
         - id: rain-format
           files: ^txma-mock/template\.yaml$
+
+        - id: rain-format
+          files: ^status-list-mock/template\.yaml$
+
+    - repo: local
+      hooks:
+        - id: status-list-mock-eslint-ts
+          name: Status List Mock - ESLint linter
+          language: system
+          entry: bash -c 'cd status-list-mock && npm run lint'
+          files: ^status-list-mock/.*\.(ts|md)$
+          stages: [pre-commit]
+
+        - id: status-list-mock-prettier-ts
+          name: Status List Mock - Prettier format check
+          language: system
+          entry: bash -c 'cd status-list-mock && npm run format:check'
+          files: ^status-list-mock/.*\.(ts|md|yaml)$
+          stages: [pre-commit]
+
+        - id: status-list-mock-jest-tests
+          name: Status List Mock - Jest unit tests
+          language: system
+          entry: bash -c 'cd status-list-mock && npm run test'
+          files: ^status-list-mock/.*\.ts$
+          stages: [pre-push]

@@ -1,0 +1,55 @@
+name: Status List Mock - Check OAS for Drift
+on:
+  schedule:
+    # runs at midnight every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      WALLET_CRS_DEPLOY_KEY:
+        required: true
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL:
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-oas-for-drift:
+    name: Check Status List OAS for Drift
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      CRS_CHECKOUT_PATH: status-list-mock/crs-backend
+      CRS_OAS_PATH: backend/openApiSpecs/crs-private-spec.yaml
+      LOCAL_OAS_PATH: status-list-mock/openApiSpec/crs/crs-private-spec.yaml
+
+    steps:
+      - name: Check out OP Mocks repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout CRS repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: govuk-one-login/crs-backend
+          path: ${{ env.CRS_CHECKOUT_PATH }}
+          ref: 'main'
+          ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
+
+      - name: Check OAS for drift
+        uses: oasdiff/oasdiff-action/diff@e7609f171f253c3e2be2a2e5c508f749ca476a07 # v0.0.45
+        with:
+          base: ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }}
+          revision: ${{ env.LOCAL_OAS_PATH }}
+          fail-on-diff: true
+
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    needs: [ check-oas-for-drift ]
+    if: failure()
+    uses: ./.github/workflows/notify-slack-on-failure.yml
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}

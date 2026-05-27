@@ -1,4 +1,4 @@
-name: Check OAS for Drift
+name: STS Mock - Check OAS for Drift
 on:
   schedule:
     # runs at midnight every day
@@ -31,7 +31,7 @@ jobs:
       - name: Check out OP Mocks repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Checkout STS Backed repo
+      - name: Checkout STS Backend repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: govuk-one-login/sts-back
@@ -56,16 +56,8 @@ jobs:
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
-    runs-on: ubuntu-24.04
     needs: [ check-oas-for-drift ]
-    permissions: {}
     if: failure()
-    steps:
-      - name: Send Slack alert
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
-        with:
-          webhook: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            "repository": "${{ github.repository }}"
-            "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    uses: ./.github/workflows/notify-slack-on-failure.yml
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
