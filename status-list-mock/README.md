@@ -15,6 +15,13 @@ This service is built with TypeScript and Node.js, deployed as AWS Lambda functi
 
 ## Set up locally
 
+### Running checks manually
+
+```bash
+pre-commit run checkov --files status-list-mock/template.yaml
+pre-commit run rain-format --files status-list-mock/template.yaml
+```
+
 ### Install
 
 ```bash
