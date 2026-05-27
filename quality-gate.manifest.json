@@ -9,7 +9,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
-            "path": "jobs.ci"
+            "path": "jobs.validate-and-build-sam-template"
           },
           "check-types": [
             "code style and linting"
@@ -20,7 +20,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/status-list-mock-push-to-main.yml",
-            "path": "jobs.run-code-analysis"
+            "path": "jobs.deploy"
           },
           "check-types": [
             "code style and linting",
