@@ -21,17 +21,6 @@ This service is built with TypeScript and Node.js, deployed as AWS Lambda functi
 npm install
 ```
 
-### Checkov
-
-We use Checkov for static analysis of our IaC. Following can be used to run a Checkov analysis locally.
-
-```bash
-brew install checkov
-
-# Running Checkov analysis
-npm run checkov
-```
-
 ### Lint and format
 
 ```bash
