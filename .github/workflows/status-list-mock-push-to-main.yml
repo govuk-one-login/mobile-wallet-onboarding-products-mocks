@@ -96,5 +96,6 @@ jobs:
         uses: govuk-one-login/devplatform-upload-action@5879c30205266ad61e8299a4fcea76364530c9c1 # v3.14.0
         with:
           artifact-bucket-name: ${{ secrets.BUILD_STATUS_LIST_MOCK_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          signing-profile-name: ${{ secrets.BUILD_STATUS_LIST_MOCK_SIGNING_PROFILE_NAME }}
           template-file: .aws-sam/build/template.yaml
           working-directory: ./status-list-mock
