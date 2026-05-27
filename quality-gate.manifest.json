@@ -47,6 +47,18 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/status-list-mock-push-to-main.yml",
+            "path": "jobs.run-checkov"
+          },
+          "check-types": [
+            "code quality",
+            "vulnerability detection"
+          ]
+        },
+        {
+          "phase": "pre-upload",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/status-list-mock-push-to-main.yml",
             "path": "jobs.deploy"
           },
           "check-types": [
