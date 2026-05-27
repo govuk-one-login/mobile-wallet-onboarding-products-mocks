@@ -9,7 +9,34 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
+            "path": "jobs.check-sam-template-formatting"
+          },
+          "check-types": [
+            "code style and linting"
+          ]
+        },
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
             "path": "jobs.validate-and-build-sam-template"
+          },
+          "check-types": [
+            "code style and linting",
+            "unit",
+            "unit test coverage",
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"
+          ]
+        },
+        {
+          "phase": "pre-upload",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/status-list-mock-push-to-main.yml",
+            "path": "jobs.check-sam-template-formatting"
           },
           "check-types": [
             "code style and linting"
