@@ -107,47 +107,26 @@ paths:
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${RevokeFunction}:live/invocations"
         type: "aws_proxy"
-  /t/{statusList}:
+  /t/{statusListIdentifier}:
     get:
-      description: Endpoint to get a status list
+      description: A public endpoint that returns an IETF Token Status List JWT. The list that is returned depends on the list type for the GOV.UK Wallet credential issuer agreed at the time of registration. The response has a signed JWT in one of the two supported status list formats.
       parameters:
         - in: path
-          name: statusList
+          name: statusListIdentifier
           schema:
             type: string
+            example: "A671FED3E9AD"
           required: true
-          description: Status list identifier
+          description: "Unique name representing the specific status list"
       responses:
         "200":
-          description: OK
-          headers:
-            Content-Type:
-              schema:
-                type: string
-            Cache-Control:
-              schema:
-                type: string
+          description: "OK"
           content:
             application/statuslist+jwt:
               schema:
                 type: string
-                example: "eyJ.."
-                description: |
-                  Status list JWT
-                  Required header claims:
-                    - alg: (string) Algorithm used for signing the JWT ("ES256")
-                    - typ: (string) Type of the token ("statuslist+jwt")
-                    - kid: (string) Key ID used to identify the signing key in the status list JWKS endpoint
-                  Required payload claims:
-                    - iss: (string) Status list URL
-                    - iat: (number) (unix timestamp) JWT issued at time
-                    - exp: (number) (unix timestamp) JWT expiration time (iat + ttl)
-                    - status_list: (object)
-                    - status_list.bits: (number) Number of bits per token in the status list (2)
-                    - status_list.lst: (string) Status values for all the tokens this list conveys statuses for
-                    - sub: (string) The URI of the status list that holds the issued credential
-                    - ttl: (string) JWT time to live
-                required: true
+                description: Signed IETF Token Status List JWT containing the status list.
+              example: <JWT>
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
