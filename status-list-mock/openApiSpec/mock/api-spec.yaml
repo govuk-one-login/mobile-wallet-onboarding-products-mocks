@@ -121,6 +121,13 @@ paths:
       responses:
         "200":
           description: "OK"
+          headers:
+            Content-Type:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
           content:
             application/statuslist+jwt:
               schema:
