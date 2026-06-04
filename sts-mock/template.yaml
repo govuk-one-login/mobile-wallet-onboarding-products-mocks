@@ -56,9 +56,10 @@ Conditions:
     - !Ref AWS::StackName
     - wallet-sts-mock
 
-    # IsIntegration: !Equals
-    #   - !Ref Environment
-    #   - integration
+  IsIntegration: !Equals
+    - !Ref Environment
+    - integration
+
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
@@ -480,8 +481,6 @@ Resources:
         - !Ref AWS::NoValue
 
   STSMockHeartbeatAlarm:
-
-    #  Condition: IsIntegration
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub ${AWS::StackName}-STSMockHeartbeatAlarm
@@ -491,7 +490,7 @@ Resources:
       Dimensions:
         - Name: CanaryName
           Value: sts_mock_heartbeat
-      Period: 600 # 3 hours in seconds, as the canary runs every 3 hours
+      Period: 10800 # 3 hours in seconds, as the canary runs every 3 hours
       EvaluationPeriods: 1
       Statistic: Maximum
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -502,6 +501,7 @@ Resources:
         - !ImportValue alarm-sns-topic-warning
       OKActions:
         - !ImportValue alarm-sns-topic-warning
+    Condition: IsIntegration
 
 Outputs:
   StsMockFriendlyUrl:
