@@ -491,7 +491,7 @@ Resources:
       Dimensions:
         - Name: CanaryName
           Value: sts_mock_heartbeat
-      Period: 10800 # 3 hours in seconds, as the canary runs every 3 hours
+      Period: 600 # 3 hours in seconds, as the canary runs every 3 hours
       EvaluationPeriods: 1
       Statistic: Maximum
       ComparisonOperator: GreaterThanOrEqualToThreshold
