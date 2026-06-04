@@ -759,14 +759,24 @@ paths:
                     {
                       "access_token": "credential_issuer_access_token",
                       "refresh_token": "refresh_token",
+                      "refresh_token_timeout": 180,
                       "token_type": "Bearer",
                       "expires_in": 180
                     }
-                refresh_token:
+                login_refresh_token:
                   value:
                     {
                       "access_token": "refreshed_access_token",
                       "refresh_token": "new_refresh_token",
+                      "token_type": "Bearer",
+                      "expires_in": 180
+                    }
+                credential_refresh_token:
+                  value:
+                    {
+                      "access_token": "refreshed_access_token",
+                      "refresh_token": "new_refresh_token",
+                      "refresh_token_timeout": 180,
                       "token_type": "Bearer",
                       "expires_in": 180
                     }
@@ -808,6 +818,10 @@ paths:
                     type: integer
                     description: |
                       The length of time the token is valid for. This is displayed in seconds.
+                  refresh_token_timeout:
+                    type: integer
+                    description: |
+                      The length of time the refresh token is valid for. This is displayed in seconds.
                 required:
                   - access_token
                   - token_type
