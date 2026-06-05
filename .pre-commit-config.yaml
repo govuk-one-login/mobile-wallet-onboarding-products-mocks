@@ -12,7 +12,7 @@
         - id: check-json
         - id: check-merge-conflict
         - id: check-yaml
-          exclude: ^sts-mock/sts\.yaml$
+          exclude: ^sts-mock/sts\.yaml$|^.*/template\.yaml$
         - id: end-of-file-fixer
           exclude: ^sts-mock/sts\.yaml$
         - id: mixed-line-ending
@@ -23,25 +23,26 @@
     - repo: https://github.com/bridgecrewio/checkov.git
       rev: 3.2.529
       hooks:
-        - id: checkov
+
+        - id: checkov_diff
           verbose: true
           files: ^sts-mock/template\.yaml$
 
-        - id: checkov
+        - id: checkov_diff
           verbose: true
           files: ^txma-mock/template\.yaml$
 
-        - id: checkov
+        - id: checkov_diff
           verbose: true
           files: ^status-list-mock/template\.yaml$
 
     - repo: https://github.com/aws-cloudformation/cfn-lint
       rev: v1.51.0
       hooks:
-        - id: cfn-lint-rc
+        - id: cfn-lint
           files: ^sts-mock/template\.yaml$
 
-        - id: cfn-lint-rc
+        - id: cfn-lint
           files: ^txma-mock/template\.yaml$
 
     - repo: https://github.com/aws-cloudformation/rain
