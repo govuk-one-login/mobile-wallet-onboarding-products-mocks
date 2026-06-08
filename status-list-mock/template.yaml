@@ -760,6 +760,7 @@ Resources:
         - !ImportValue alarm-sns-topic-warning
       OKActions:
         - !ImportValue alarm-sns-topic-warning
+    Condition: IsIntegration
 
   SigningKeyAlias:
     Type: AWS::KMS::Alias
