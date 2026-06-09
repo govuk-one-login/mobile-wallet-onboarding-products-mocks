@@ -44,6 +44,11 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def accessToken = buildAccessToken(payload)
     println "Built access token successfully, returning 200"
     def responseBody = [access_token: accessToken, token_type: "bearer", expires_in: 180]
+
+    def dpopHeader = context.request.headers['DPoP']
+    if (payload.credential_configuration_ids && dpopHeader) {
+        responseBody.refresh_token = buildRefreshToken(payload)
+    }
     respond().withData(JsonOutput.toJson(responseBody))
 
 } else if (grantType == 'authorization_code') {
@@ -121,6 +126,32 @@ def buildAccessToken(Map payload) {
     def accessTokenHeader = [alg: "ES256", typ: "at+jwt", kid: "C9De3xMDDyG7Nce4kGm09pCamzTMmYefPSmWw4FhnUg"]
     def encodedHeader = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(accessTokenHeader).bytes)
 
+    def encodedSignature = "yBpJ0zhIZWNQqpszXxbil8FmI0DcJ_JG7mHZlrBthVg16lkrcvj662Swl5tpXZbhm-k6LKsmh8CbiiCp-4bRkg"
+
+    return "${encodedHeader}.${encodedPayload}.${encodedSignature}"
+}
+
+def buildRefreshToken(Map payload) {
+    def selfUrl = System.getenv('SELF_URL') ?: "http://localhost:9090"
+
+    def header = [alg: "ES256", typ: "JWT", kid: "hardcoded"]
+
+    def refreshTokenPayload = [
+            aud                   : selfUrl,
+            iss                   : selfUrl,
+            clientId              : payload.clientId,
+            sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+            exp                   : ((System.currentTimeMillis() / 1000) as Long) + (15 * 30 * 24 * 60 * 60),
+            iat                   : (System.currentTimeMillis() / 1000) as Long,
+            credential_configuration_ids: payload.credential_configuration_ids,
+            scope                 : "sts.wallet.refresh",
+            jti                   : UUID.randomUUID().toString(),
+            cnf                   : [jkt: "THUMBPRINT"]
+    ]
+
+
+    def encodedHeader = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(header).bytes)
+    def encodedPayload = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(refreshTokenPayload).bytes)
     def encodedSignature = "yBpJ0zhIZWNQqpszXxbil8FmI0DcJ_JG7mHZlrBthVg16lkrcvj662Swl5tpXZbhm-k6LKsmh8CbiiCp-4bRkg"
 
     return "${encodedHeader}.${encodedPayload}.${encodedSignature}"
