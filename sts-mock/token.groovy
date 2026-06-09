@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 // 15 months in seconds (15 months * 30 days * 24 hours * 60 minutes * 60 seconds)
-def FIFTEEN_MONTHS_IN_SECONDS = 15 * 30 * 24 * 60 * 60
+FIFTEEN_MONTHS_IN_SECONDS = 15 * 30 * 24 * 60 * 60
 
 println "Raw token request body: ${context.request.body}"
 
