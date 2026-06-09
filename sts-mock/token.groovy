@@ -135,7 +135,7 @@ def buildAccessToken(Map payload) {
 def buildRefreshToken(Map payload) {
     def selfUrl = System.getenv('SELF_URL') ?: "http://localhost:9090"
 
-    def header = [alg: "ES256", typ: "JWT", kid: "hardcoded"]
+    def refreshTokenHeader = [alg: "ES256", typ: "JWT", kid: "C9De3xMDDyG7Nce4kGm09pCamzTMmYefPSmWw4FhnUg"]
 
     def refreshTokenPayload = [
             aud                   : selfUrl,
@@ -147,11 +147,11 @@ def buildRefreshToken(Map payload) {
             credential_configuration_ids: payload.credential_configuration_ids,
             scope                 : "sts.wallet.refresh",
             jti                   : UUID.randomUUID().toString(),
-            cnf                   : [jkt: "THUMBPRINT"]
+            cnf                   : [jkt: "C9De3xMDDyG7Nce4kGm09pCamzTMmYefPSmWw4FhnUg"]
     ]
 
 
-    def encodedHeader = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(header).bytes)
+    def encodedHeader = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(refreshTokenHeader).bytes)
     def encodedPayload = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(refreshTokenPayload).bytes)
     def encodedSignature = "yBpJ0zhIZWNQqpszXxbil8FmI0DcJ_JG7mHZlrBthVg16lkrcvj662Swl5tpXZbhm-k6LKsmh8CbiiCp-4bRkg"
 
