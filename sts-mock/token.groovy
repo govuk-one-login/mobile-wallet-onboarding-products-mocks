@@ -117,6 +117,7 @@ def buildAccessToken(Map payload) {
             iss                   : selfUrl,
             aud                   : issuerBaseUrl,
             credential_identifiers: payload.credential_identifiers,
+            credential_configuration_ids: payload.credential_configuration_ids,
             c_nonce               : UUID.randomUUID().toString(),
             exp                   : ((System.currentTimeMillis() / 1000) as Long) + 180,
             jti                   : UUID.randomUUID().toString()
