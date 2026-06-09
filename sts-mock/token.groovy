@@ -1,6 +1,9 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
+// 15 months in seconds (15 months * 30 days * 24 hours * 60 minutes * 60 seconds)
+def FIFTEEN_MONTHS_IN_SECONDS = 15 * 30 * 24 * 60 * 60
+
 println "Raw token request body: ${context.request.body}"
 
 def params = parseUrlEncodedBody(context.request.body)
@@ -142,7 +145,7 @@ def buildRefreshToken(Map payload) {
             iss                   : selfUrl,
             clientId              : payload.clientId,
             sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
-            exp                   : ((System.currentTimeMillis() / 1000) as Long) + (15 * 30 * 24 * 60 * 60),
+            exp                   : ((System.currentTimeMillis() / 1000) as Long) + FIFTEEN_MONTHS_IN_SECONDS,
             iat                   : (System.currentTimeMillis() / 1000) as Long,
             credential_configuration_ids: payload.credential_configuration_ids,
             scope                 : "sts.wallet.refresh",
