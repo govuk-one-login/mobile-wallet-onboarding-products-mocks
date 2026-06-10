@@ -46,7 +46,7 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     }
 
     def accessToken = buildAccessToken(payload)
-    println "Built access token successfully, returning 200"
+    println "Returning 200 with access token successfully,"
     def responseBody = [access_token: accessToken, token_type: "bearer", expires_in: 180]
 
     def dpopHeader = context.request.headers['DPoP']
