@@ -53,8 +53,10 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     if (payload.credential_configuration_ids && dpopHeader) {
         responseBody.refresh_token = buildRefreshToken(payload)
         responseBody.refresh_token_timeout = FIFTEEN_MONTHS_IN_SECONDS
-        println "Returning 200 with token(s) successfully,"
+        println "Built refresh token successfully,"
     }
+
+    println "Returning 200 with token(s) successfully,"
     respond().withData(JsonOutput.toJson(responseBody))
 
 } else if (grantType == 'authorization_code') {
