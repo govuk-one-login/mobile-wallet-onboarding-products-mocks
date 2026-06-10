@@ -47,6 +47,13 @@ Resources:
       ParentId: !GetAtt MockApi.RootResourceId
       PathPart: txma-event
 
+  TxmaHealthcheckResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MockApi
+      ParentId: !GetAtt MockApi.RootResourceId
+      PathPart: txma-healthcheck
+
   TxmaEventPostMethod:
     Type: AWS::ApiGateway::Method
     Metadata:
@@ -59,6 +66,30 @@ Resources:
       RestApiId: !Ref MockApi
       ResourceId: !Ref TxmaEventResource
       HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+
+  TxmaHealthcheckGetMethod:
+    Type: AWS::ApiGateway::Method
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_59
+            rule: Ensure there is no open access to back-end resources through API
+            comment: The API Gateway is set up as a mock integration, so there are no back-end resources that can be accessed through it.
+    Properties:
+      RestApiId: !Ref MockApi
+      ResourceId: !Ref TxmaHealthcheckResource
+      HttpMethod: GET
       AuthorizationType: NONE
       Integration:
         Type: MOCK
