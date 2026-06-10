@@ -46,14 +46,14 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     }
 
     def accessToken = buildAccessToken(payload)
-    println "Returning 200 with access token successfully,"
+    println "Built access token successfully,"
     def responseBody = [access_token: accessToken, token_type: "bearer", expires_in: 180]
 
     def dpopHeader = context.request.headers['DPoP']
     if (payload.credential_configuration_ids && dpopHeader) {
         responseBody.refresh_token = buildRefreshToken(payload)
         responseBody.refresh_token_timeout = FIFTEEN_MONTHS_IN_SECONDS
-        println "Built refresh token successfully"
+        println "Returning 200 with token(s) successfully,"
     }
     respond().withData(JsonOutput.toJson(responseBody))
 
