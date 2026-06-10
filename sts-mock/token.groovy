@@ -52,6 +52,7 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def dpopHeader = context.request.headers['DPoP']
     if (payload.credential_configuration_ids && dpopHeader) {
         responseBody.refresh_token = buildRefreshToken(payload)
+        println "Built refresh token successfully"
     }
     respond().withData(JsonOutput.toJson(responseBody))
 
