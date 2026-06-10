@@ -3,6 +3,7 @@ import groovy.json.JsonSlurper
 
 // 15 months in seconds (15 months * 30 days * 24 hours * 60 minutes * 60 seconds)
 FIFTEEN_MONTHS_IN_SECONDS = 15 * 30 * 24 * 60 * 60
+SELF_URL = System.getenv('SELF_URL') ?: "http://localhost:9090"
 
 println "Raw token request body: ${context.request.body}"
 
@@ -112,12 +113,11 @@ static def parseJwtPayload(String jwt) {
  * @return The access token
  */
 def buildAccessToken(Map payload) {
-    def selfUrl = System.getenv('SELF_URL') ?: "http://localhost:9090"
     def issuerBaseUrl = System.getenv('CREDENTIAL_ISSUER_URL') ?: "http://localhost:8080"
 
     def accessTokenPayload = [
             sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
-            iss                   : selfUrl,
+            iss                   : SELF_URL,
             aud                   : issuerBaseUrl,
             credential_identifiers: payload.credential_identifiers,
             credential_configuration_ids: payload.credential_configuration_ids,
@@ -136,13 +136,11 @@ def buildAccessToken(Map payload) {
 }
 
 def buildRefreshToken(Map payload) {
-    def selfUrl = System.getenv('SELF_URL') ?: "http://localhost:9090"
-
     def refreshTokenHeader = [alg: "ES256", typ: "JWT", kid: "C9De3xMDDyG7Nce4kGm09pCamzTMmYefPSmWw4FhnUg"]
 
     def refreshTokenPayload = [
-            aud                   : selfUrl,
-            iss                   : selfUrl,
+            aud                   : SELF_URL,
+            iss                   : SELF_URL,
             clientId              : payload.clientId,
             sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
             exp                   : ((System.currentTimeMillis() / 1000) as Long) + FIFTEEN_MONTHS_IN_SECONDS,
