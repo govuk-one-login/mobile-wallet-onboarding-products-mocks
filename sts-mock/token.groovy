@@ -147,7 +147,7 @@ def buildRefreshToken(Map payload) {
             exp                   : ((System.currentTimeMillis() / 1000) as Long) + FIFTEEN_MONTHS_IN_SECONDS,
             iat                   : (System.currentTimeMillis() / 1000) as Long,
             credential_configuration_ids: payload.credential_configuration_ids,
-            scope                 : "sts.wallet.refresh",
+            scope                 : "mock-sts.wallet-onboarding.refresh",
             jti                   : UUID.randomUUID().toString(),
             cnf                   : [jkt: "C9De3xMDDyG7Nce4kGm09pCamzTMmYefPSmWw4FhnUg"]
     ]
