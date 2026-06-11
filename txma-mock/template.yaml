@@ -26,9 +26,10 @@ Conditions:
     - !Ref AWS::StackName
     - wallet-txma-mock
 
-    # IsIntegration: !Equals
-    #   - !Ref Environment
-    #   - integration
+  IsIntegration: !Equals
+    - !Ref Environment
+    - integration
+
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
@@ -227,8 +228,8 @@ Resources:
         - !ImportValue alarm-sns-topic-warning
       OKActions:
         - !ImportValue alarm-sns-topic-warning
+    Condition: IsIntegration
 
-        #Condition: IsIntegration
 Outputs:
   TxMAMockFriendlyUrl:
     Description: Friendly URL for the deployed TxMA mock
