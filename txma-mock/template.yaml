@@ -134,7 +134,10 @@ Resources:
 
   MockApiDeployment:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: TxmaEventPostMethod
+    DependsOn:
+      - TxmaEventPostMethod
+      - TxmaHealthcheckGetMethod
+      - OptionsMethod
     Properties:
       RestApiId: !Ref MockApi
 
