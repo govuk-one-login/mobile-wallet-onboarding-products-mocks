@@ -68,8 +68,24 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     respond().withExampleName('token_exchange')
 
 } else if (grantType == 'refresh_token') {
-    println "refresh_token flow, returning refresh_token example"
-    respond().withExampleName('refresh_token')
+    println "refresh_token flow, building new access & refresh token"
+
+    def refreshTokenBody = params['refresh_token']
+    def payload = parseJwtPayload(refreshTokenBody)
+    println "Parsed JWT payload: ${payload}"
+
+    def accessToken = buildAccessToken(payload)
+    def refreshToken = buildRefreshToken(payload)
+
+    def responseBody = [
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            "refresh_token_timeout": FIFTEEN_MONTHS_IN_SECONDS,
+            token_type: "bearer",
+            expires_in: 180,
+    ]
+
+    respond().withData(JsonOutput.toJson(responseBody))
 }
 
 /**
@@ -123,12 +139,16 @@ def buildAccessToken(Map payload) {
             sub                   : "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
             iss                   : SELF_URL,
             aud                   : issuerBaseUrl,
-            credential_identifiers: payload.credential_identifiers,
             credential_configuration_ids: payload.credential_configuration_ids,
             c_nonce               : UUID.randomUUID().toString(),
             exp                   : ((System.currentTimeMillis() / 1000) as Long) + 180,
             jti                   : UUID.randomUUID().toString()
     ]
+
+    if (payload.credential_identifiers) {
+        accessTokenPayload.credential_identifiers = payload.credential_identifiers
+    }
+
     def encodedPayload = Base64.urlEncoder.withoutPadding().encodeToString(JsonOutput.toJson(accessTokenPayload).bytes)
 
     def accessTokenHeader = [alg: "ES256", typ: "at+jwt", kid: "C9De3xMDDyG7Nce4kGm09pCamzTMmYefPSmWw4FhnUg"]
