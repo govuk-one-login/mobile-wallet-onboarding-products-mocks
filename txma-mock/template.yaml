@@ -26,6 +26,10 @@ Conditions:
     - !Ref AWS::StackName
     - wallet-txma-mock
 
+  IsIntegration: !Equals
+    - !Ref Environment
+    - integration
+
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
@@ -43,6 +47,13 @@ Resources:
       RestApiId: !Ref MockApi
       ParentId: !GetAtt MockApi.RootResourceId
       PathPart: txma-event
+
+  TxmaHealthcheckResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MockApi
+      ParentId: !GetAtt MockApi.RootResourceId
+      PathPart: txma-healthcheck
 
   TxmaEventPostMethod:
     Type: AWS::ApiGateway::Method
@@ -68,9 +79,65 @@ Resources:
           ResponseModels:
             application/json: Empty
 
+  TxmaHealthcheckGetMethod:
+    Type: AWS::ApiGateway::Method
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_59
+            rule: Ensure there is no open access to back-end resources through API
+            comment: The API Gateway is set up as a mock integration, so there are no back-end resources that can be accessed through it.
+    Properties:
+      RestApiId: !Ref MockApi
+      ResourceId: !Ref TxmaHealthcheckResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+
+  OptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref MockApi
+      ResourceId: !Ref TxmaHealthcheckResource
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            ResponseTemplates:
+              application/json: ""
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
   MockApiDeployment:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: TxmaEventPostMethod
+    DependsOn:
+      - TxmaEventPostMethod
+      - TxmaHealthcheckGetMethod
+      - OptionsMethod
     Properties:
       RestApiId: !Ref MockApi
 
@@ -142,6 +209,29 @@ Resources:
     Properties:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-gateway-access-logs
       RetentionInDays: 14
+
+  TXMAMockHeartbeatAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-TXMAMockHeartbeatAlarm
+      AlarmDescription: 'TXMAMock-Heartbeat Synthetic-Canary Alarm: Failed  GreaterThanOrEqualToThreshold 1'
+      MetricName: Failed
+      Namespace: CloudWatchSynthetics
+      Dimensions:
+        - Name: CanaryName
+          Value: txma_mock_heartbeat
+      Period: 10800 # 3 hours in seconds, as the canary runs every 3 hours
+      EvaluationPeriods: 1
+      Statistic: Maximum
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Threshold: 1.0
+      TreatMissingData: notBreaching
+      ActionsEnabled: true
+      AlarmActions:
+        - !ImportValue alarm-sns-topic-warning
+      OKActions:
+        - !ImportValue alarm-sns-topic-warning
+    Condition: IsIntegration
 
 Outputs:
   TxMAMockFriendlyUrl:
