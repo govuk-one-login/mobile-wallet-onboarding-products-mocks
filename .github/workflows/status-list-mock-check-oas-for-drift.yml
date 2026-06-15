@@ -29,10 +29,10 @@ jobs:
 
     steps:
       - name: Check out OP Mocks repo
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Checkout CRS repo
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           repository: govuk-one-login/crs-backend
           path: ${{ env.CRS_CHECKOUT_PATH }}
@@ -40,7 +40,7 @@ jobs:
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
       - name: Check OAS for drift
-        uses: oasdiff/oasdiff-action/diff@f30668f65075c93440bd59ce2de73ce9e78751f4 # v0.0.51
+        uses: oasdiff/oasdiff-action/diff@3530478ec30f84adedbfeb28f0d9527a290f50a9 # v0.0.57
         with:
           base: ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }}
           revision: ${{ env.LOCAL_OAS_PATH }}
