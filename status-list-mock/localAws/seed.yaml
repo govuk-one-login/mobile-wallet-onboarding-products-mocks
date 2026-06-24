@@ -1,0 +1,11 @@
+Keys:
+  Asymmetric:
+    Ecc:
+      - Metadata:
+          KeyId: fe960654-cdc9-4580-9368-8c58c3865a46
+          KeyUsage: SIGN_VERIFY
+          Description: Status List signing key
+
+Aliases:
+  - AliasName: alias/localSigningKeyAlias
+    TargetKeyId: fe960654-cdc9-4580-9368-8c58c3865a46

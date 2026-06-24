@@ -1,7 +1,8 @@
+name: status_list_mock
 services:
   floci:
     container_name: floci_statusListMock
-    image: floci/floci:latest-compat
+    image: floci/floci:1.5.27-compat
     ports:
       - "4562:4566"
     environment:
