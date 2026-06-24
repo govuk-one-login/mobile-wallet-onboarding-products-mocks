@@ -1,18 +1,19 @@
 import {
   getKmsConfig,
   getS3Config,
-  getLocalStackAwsClientConfig,
+  getLocalAwsClientConfig,
 } from "../../src/config/aws";
 
 const AWS_REGION = "eu-west-2";
-const LOCALSTACK_ENDPOINT = "http://host.docker.internal:4562";
+const LOCAL_AWS_ENDPOINT = "http://host.docker.internal:4562";
+const LOCAL_KMS_ENDPOINT = "http://host.docker.internal:4562";
 
-describe("getLocalStackAwsClientConfig", () => {
-  it("should return LocalStack AWS client config object", () => {
-    const config = getLocalStackAwsClientConfig();
+describe("getLocalAwsClientConfig", () => {
+  it("should return Local AWS client config object", () => {
+    const config = getLocalAwsClientConfig();
 
     expect(config).toEqual({
-      endpoint: LOCALSTACK_ENDPOINT,
+      endpoint: LOCAL_AWS_ENDPOINT,
       credentials: {
         accessKeyId: "test",
         secretAccessKey: "test",
@@ -23,12 +24,12 @@ describe("getLocalStackAwsClientConfig", () => {
 });
 
 describe("getKmsConfig", () => {
-  it("should return LocalStack AWS client config object when isLocal=true", () => {
+  it("should return Local KMS client config object when isLocal=true", () => {
     const isLocal = true;
     const config = getKmsConfig(isLocal);
 
     expect(config).toEqual({
-      endpoint: LOCALSTACK_ENDPOINT,
+      endpoint: LOCAL_KMS_ENDPOINT,
       credentials: {
         accessKeyId: "test",
         secretAccessKey: "test",
@@ -37,7 +38,7 @@ describe("getKmsConfig", () => {
     });
   });
 
-  it("should return empty AWS client config object when isLocal=false", () => {
+  it("should return empty KMS client config object when isLocal=false", () => {
     const isLocal = false;
     const config = getKmsConfig(isLocal);
 
@@ -46,12 +47,12 @@ describe("getKmsConfig", () => {
 });
 
 describe("getS3Config", () => {
-  it("should return LocalStack AWS client config object with forcePathStyle when isLocal=true", () => {
+  it("should return Local AWS AWS client config object with forcePathStyle when isLocal=true", () => {
     const isLocal = true;
     const config = getS3Config(isLocal);
 
     expect(config).toEqual({
-      endpoint: LOCALSTACK_ENDPOINT,
+      endpoint: LOCAL_AWS_ENDPOINT,
       credentials: {
         accessKeyId: "test",
         secretAccessKey: "test",
