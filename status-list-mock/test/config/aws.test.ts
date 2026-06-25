@@ -6,7 +6,7 @@ import {
 
 const AWS_REGION = "eu-west-2";
 const LOCAL_AWS_ENDPOINT = "http://host.docker.internal:4562";
-const LOCAL_KMS_ENDPOINT = "http://host.docker.internal:4562";
+const LOCAL_KMS_ENDPOINT = "http://host.docker.internal:4563";
 
 describe("getLocalAwsClientConfig", () => {
   it("should return Local AWS client config object", () => {
@@ -30,11 +30,6 @@ describe("getKmsConfig", () => {
 
     expect(config).toEqual({
       endpoint: LOCAL_KMS_ENDPOINT,
-      credentials: {
-        accessKeyId: "test",
-        secretAccessKey: "test",
-      },
-      region: AWS_REGION,
     });
   });
 
