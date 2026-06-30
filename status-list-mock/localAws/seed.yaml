@@ -1,0 +1,17 @@
+Keys:
+  Asymmetric:
+    Ecc:
+      - Metadata:
+          KeyId: fe960654-cdc9-4580-9368-8c58c3865a46
+          KeyUsage: SIGN_VERIFY
+          Description: Status List signing key
+        PrivateKeyPem: |
+          -----BEGIN EC PRIVATE KEY-----
+          MHcCAQEEIKexbdPE2TDYzOuasfwN4QWNqHF1wNsV30ERMPPaRYnWoAo
+          GCCqGSM49AwEHoUQDQgAE+NKi4QpYV/avqTFFoldRIYEZaRgKF/qv+
+          xJsek63Eh2cKn922zlJHj2KglzSlLm439BfFYGDYVet6W7pkvIYfg==
+          -----END EC PRIVATE KEY-----
+
+Aliases:
+  - AliasName: alias/localSigningKeyAlias
+    TargetKeyId: fe960654-cdc9-4580-9368-8c58c3865a46
