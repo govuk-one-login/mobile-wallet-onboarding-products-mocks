@@ -405,6 +405,8 @@ Resources:
                     - EnvironmentVariables
                     - !Ref Environment
                     - CredentialIssuerUrl
+            - Name: IMPOSTER_SYSTEM_ENDPOINTS_ENABLED
+              Value: "false"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
