@@ -249,6 +249,22 @@ Resources:
         - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
       SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
 
+  LoadBalancerListenerBlockSystemRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref LoadBalancerListener
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /system/*
+      Actions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: "404"
+            ContentType: text/plain
+            MessageBody: Not Found
+
   ApiGatewayHttpEndpoint:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -405,8 +421,6 @@ Resources:
                     - EnvironmentVariables
                     - !Ref Environment
                     - CredentialIssuerUrl
-            - Name: IMPOSTER_SYSTEM_ENDPOINTS_ENABLED
-              Value: "false"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
