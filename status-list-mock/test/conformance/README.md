@@ -46,7 +46,7 @@ The private spec suites share port 4010 and run serially (`maxWorkers: 1` in
 Prerequisites: Docker running, SAM artefact built (`npm run build`), `.env.json` present.
 
 ```bash
-# Terminal 1 — start LocalStack + SAM local
+# Terminal 1 — start Local AWS emulator + SAM local
 npm run build
 npm run dev
 

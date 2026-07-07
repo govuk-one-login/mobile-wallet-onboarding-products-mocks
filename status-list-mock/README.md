@@ -11,7 +11,7 @@ This service is built with TypeScript and Node.js, deployed as AWS Lambda functi
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/en) — we recommend managing versions with [nvm](https://github.com/nvm-sh/nvm)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run LocalStack locally and to build the app image
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run locally and to build the app image
 
 ## Set up locally
 
@@ -51,7 +51,7 @@ Create a local environment file:
 cp .env.json.example .env.json
 ```
 
-Start LocalStack.
+Start local aws emulator.
 Invoke the JwksFunction Lambda function.
 Run the JwksFunction, InvokeFunction and RevokeFunction Lambda functions locally to test through a local HTTP server host.
 

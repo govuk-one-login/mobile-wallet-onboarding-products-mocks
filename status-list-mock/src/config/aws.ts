@@ -7,7 +7,7 @@ type AwsBaseClientConfig = {
   region: string;
 };
 
-export function getLocalStackAwsClientConfig(): AwsBaseClientConfig {
+export function getLocalAwsClientConfig(): AwsBaseClientConfig {
   return {
     endpoint: "http://host.docker.internal:4562", // NOSONAR: This endpoint is for internal Docker host
     // communication within a local environment. HTTPS is not supported for 'host.docker.internal' and
@@ -22,7 +22,7 @@ export function getLocalStackAwsClientConfig(): AwsBaseClientConfig {
 
 export function getKmsConfig(isLocal: boolean): KMSClientConfig {
   if (isLocal) {
-    return getLocalStackAwsClientConfig();
+    return { endpoint: "http://host.docker.internal:4563" };
   }
 
   return {};
@@ -31,7 +31,7 @@ export function getKmsConfig(isLocal: boolean): KMSClientConfig {
 export function getS3Config(isLocal: boolean): S3ClientConfig {
   if (isLocal) {
     return {
-      ...getLocalStackAwsClientConfig(),
+      ...getLocalAwsClientConfig(),
       forcePathStyle: true,
     };
   }
