@@ -149,7 +149,7 @@ paths:
             description: OK
             responseParameters:
               method.response.header.Content-Type: "'application/statuslist+jwt'"
-              method.response.header.Cache-Control: "'max-age=3600'"
+              method.response.header.Cache-Control: "'max-age=30'"
             contentHandling: "CONVERT_TO_TEXT"
           default:
             statusCode: "500"
