@@ -6,7 +6,7 @@ services:
     ports:
       - "4562:4566"
     environment:
-      - SERVICES=kms,s3
+      - SERVICES=s3
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=eu-west-2
