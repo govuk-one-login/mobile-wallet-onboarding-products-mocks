@@ -287,11 +287,21 @@ Resources:
       TlsConfig:
         ServerNameToVerify: !Ref CustomDomain
 
-  ApiGatewayRoute:
+  ApiGatewayRouteToken:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref ApiGatewayHttpEndpoint
-      RouteKey: ANY /{proxy+}
+      RouteKey: POST /token
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref ApiGatewayHttpEndpointIntegration
+
+  ApiGatewayRouteHealthcheck:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      RouteKey: GET /healthcheck
       Target: !Join
         - /
         - - integrations
@@ -399,6 +409,8 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
+            - Name: IMPOSTER_FEATURES
+            - Value: metrics=false
             - Name: SELF_URL
               Value: !If
                 - StackNameIsWalletStsMock
