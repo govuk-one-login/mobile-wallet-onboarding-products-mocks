@@ -1,0 +1,26 @@
+name: status_list_mock
+services:
+  floci:
+    container_name: floci_statusListMock
+    image: floci/floci:1.5.27-compat
+    ports:
+      - "4562:4566"
+    environment:
+      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - ./provision.sh:/etc/floci/init/ready.d/provision.sh
+
+  kms:
+    container_name: local_kms_statusListMock
+    image: nsmithuk/local-kms
+    ports:
+      - "4563:8080"
+    environment:
+      - KMS_ACCOUNT_ID=000000000000
+      - KMS_REGION=eu-west-2
+      - KMS_SEED_PATH=/init/seed.yaml
+    volumes:
+      - ./seed.yaml:/init/seed.yaml
