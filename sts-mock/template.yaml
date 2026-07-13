@@ -409,8 +409,6 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
-            - Name: IMPOSTER_FEATURES
-              Value: stores=false,metrics=false
             - Name: SELF_URL
               Value: !If
                 - StackNameIsWalletStsMock
