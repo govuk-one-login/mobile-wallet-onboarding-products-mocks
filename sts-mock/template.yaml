@@ -249,6 +249,22 @@ Resources:
         - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
       SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
 
+  LoadBalancerListenerBlockSystemRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref LoadBalancerListener
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /system/*
+      Actions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: "404"
+            ContentType: text/plain
+            MessageBody: Not Found
+
   ApiGatewayHttpEndpoint:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -271,11 +287,21 @@ Resources:
       TlsConfig:
         ServerNameToVerify: !Ref CustomDomain
 
-  ApiGatewayRoute:
+  ApiGatewayRouteToken:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref ApiGatewayHttpEndpoint
-      RouteKey: ANY /{proxy+}
+      RouteKey: POST /token
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref ApiGatewayHttpEndpointIntegration
+
+  ApiGatewayRouteHealthcheck:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      RouteKey: GET /healthcheck
       Target: !Join
         - /
         - - integrations
@@ -383,6 +409,8 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
+            - Name: IMPOSTER_FEATURES
+              Value: stores=false,metrics=false
             - Name: SELF_URL
               Value: !If
                 - StackNameIsWalletStsMock
