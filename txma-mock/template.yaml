@@ -216,7 +216,7 @@ Resources:
       Dimensions:
         - Name: CanaryName
           Value: txma_mock_heartbeat
-      Period: 3600 # 1 hour in seconds
+      Period: 600 # 10 mins in seconds
       EvaluationPeriods: 1
       Statistic: Maximum
       ComparisonOperator: GreaterThanOrEqualToThreshold
