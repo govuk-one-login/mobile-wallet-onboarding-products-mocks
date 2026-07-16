@@ -1,0 +1,13 @@
+services:
+  localstack:
+    container_name: localstack_statusListMock
+    image: localstack/localstack:4.14.0@sha256:3ebc37595918b8accb852f8048fef2aff047d465167edd655528065b07bc364a # Cannot be updated past 4.14.0 due to LocalStack's move to a paid-only license.
+    ports:
+      - "4562:4566"
+    environment:
+      - SERVICES=kms,s3
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - ./provision.sh:/etc/localstack/init/ready.d/provision.sh
