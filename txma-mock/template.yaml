@@ -150,9 +150,14 @@ Resources:
       - OptionsMethod
     Properties:
       RestApiId: !Ref MockApi
+      StageName: !Ref Environment
 
   MockApiStage:
     Type: AWS::ApiGateway::Stage
+    DependsOn:
+      - TxmaEventPostMethod
+      - TxmaHealthcheckGetMethod
+      - OptionsMethod
     Metadata:
       checkov:
         skip:
