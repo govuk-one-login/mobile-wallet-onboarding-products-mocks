@@ -143,6 +143,10 @@ Resources:
 
   MockApiStage:
     Type: AWS::ApiGateway::Stage
+    DependsOn:
+      - TxmaEventPostMethod
+      - TxmaHealthcheckGetMethod
+      - OptionsMethod
     Metadata:
       checkov:
         skip:
