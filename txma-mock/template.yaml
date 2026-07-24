@@ -143,6 +143,10 @@ Resources:
 
   MockApiStage:
     Type: AWS::ApiGateway::Stage
+    DependsOn:
+      - TxmaEventPostMethod
+      - TxmaHealthcheckGetMethod
+      - OptionsMethod
     Metadata:
       checkov:
         skip:
@@ -225,7 +229,7 @@ Resources:
       Statistic: Maximum
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Threshold: 1.0
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
       ActionsEnabled: true
       AlarmActions:
         - !ImportValue alarm-sns-topic-warning
