@@ -26,6 +26,10 @@ Conditions:
     - !Ref AWS::StackName
     - wallet-txma-mock
 
+  IsIntegration: !Equals
+    - !Ref Environment
+    - integration
+
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
@@ -215,15 +219,15 @@ Resources:
     Properties:
       AlarmName: !Sub ${AWS::StackName}-TXMAMockHeartbeatAlarm
       AlarmDescription: 'TXMAMock-Heartbeat Synthetic-Canary Alarm: Failed  GreaterThanOrEqualToThreshold 1'
-      MetricName: Failed
+      MetricName: 2xx
       Namespace: CloudWatchSynthetics
       Dimensions:
         - Name: CanaryName
           Value: txma_mock_heartbeat
       Period: 60 # 1 minute in seconds
       EvaluationPeriods: 1
-      Statistic: Maximum
-      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      ComparisonOperator: LessThanThreshold
       Threshold: 1.0
       TreatMissingData: ignore
       ActionsEnabled: true
@@ -231,6 +235,7 @@ Resources:
         - !ImportValue alarm-sns-topic-warning
       OKActions:
         - !ImportValue alarm-sns-topic-warning
+    Condition: IsIntegration
 
 Outputs:
   TxMAMockFriendlyUrl:
