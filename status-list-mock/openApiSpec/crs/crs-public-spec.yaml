@@ -6,7 +6,7 @@ info:
 paths:
   /t/{statusListIdentifier}:
     get:
-      description: A public endpoint that returns an IETF Token Status List JWT. The list that is returned depends on the list type for the GOV.UK Wallet credential issuer agreed at the time of registration. The response has a signed JWT in one of the two supported status list formats.
+      description: A public endpoint that returns a signed IETF Token Status List JWT. There is [more guidance and an example response](https://docs.wallet.service.gov.uk/issue-credentials/status-list/statuslist/#token-status-list-request-example).
       parameters:
         - in: path
           name: statusListIdentifier
@@ -16,7 +16,7 @@ paths:
           required: true
           description: "Unique name representing the specific status list"
       responses:
-        "200":
+        '200':
           description: "OK"
           content:
             application/statuslist+jwt:
@@ -24,7 +24,7 @@ paths:
                 type: string
                 description: Signed IETF Token Status List JWT containing the status list.
               example: <JWT>
-        "404":
+        '404':
           description: Not Found
           content:
             application/json:
@@ -33,7 +33,7 @@ paths:
               example:
                 error: NOT_FOUND
                 error_description: "Status List not found for endpoint uri"
-        "500":
+        '500':
           description: Internal server error
           content:
             application/json:
@@ -55,6 +55,8 @@ components:
           type: string
       required:
         - error
+      xml:
+        name: issuerequest
     StatusList500ErrorResponse:
       type: object
       properties:
