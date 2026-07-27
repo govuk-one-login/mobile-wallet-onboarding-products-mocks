@@ -743,7 +743,7 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub ${AWS::StackName}-StatusListMockHeartbeatAlarm
-      AlarmDescription: 'StatusListMock-Heartbeat Synthetic-Canary Alarm: Failed  GreaterThanOrEqualToThreshold 1'
+      AlarmDescription: 'StatusListMock-Heartbeat Synthetic-Canary Alarm: 2xx LessThanThreshold 1'
       MetricName: 2xx
       Namespace: CloudWatchSynthetics
       Dimensions:
