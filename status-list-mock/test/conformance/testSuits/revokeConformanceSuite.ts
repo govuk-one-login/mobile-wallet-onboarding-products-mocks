@@ -9,7 +9,7 @@ const PRISM_BASE_URL = `http://127.0.0.1:${PRISM_PORT}`;
 const prismBin = path.resolve(process.cwd(), "node_modules/.bin/prism");
 const apiSpec = path.resolve(
   process.cwd(),
-  "openApiSpec/crs/crs-private-spec.yaml",
+  "openApiSpec/crs/crs-status-api.yaml",
 );
 
 // Minimal JWT required by the revoke handler. Signature is not verified.
