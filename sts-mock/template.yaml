@@ -436,6 +436,15 @@ Resources:
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
+          ReadonlyRootFilesystem: true
+          LinuxParameters:
+            Tmpfs:
+              - ContainerPath: /tmp
+                Size: 128
+                MountOptions:
+                  - rw
+                  - noexec
+                  - nosuid
           LogConfiguration:
             LogDriver: awslogs
             Options:
