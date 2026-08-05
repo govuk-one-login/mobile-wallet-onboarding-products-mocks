@@ -17,7 +17,7 @@ x-definitions:
     # The below content security policy allows any content hosted on this API, and the GOV.UK-provided inline script
     # that hashes to the specified value.
     # Hash of additional styles on /error page
-    method.response.header.Content-Security-Policy: "'default-src 'self'; script-src 'self' 'sha256-M80RLcRm48jnTp96aiGlbLYaHFV91XCjJpgYgPmCrZk='; style-src 'self' 'sha256-OSQZaptXMv+LtEfDx7ttZqxVa9cWe2GRD1cJLlMxqUg='; connect-src 'self'; frame-ancestors 'none'; form-action 'none''"
+    method.response.header.Content-Security-Policy: "'default-src 'self'; script-src 'self' 'sha256-M80RLcRm48jnTp96aiGlbLYaHFV91XCjJpgYgPmCrZk='; connect-src 'self'; frame-ancestors 'none'; form-action 'none''"
     method.response.header.Referrer-Policy: "'no-referrer'"
 
 # Reusable OpenAPI components. See https://swagger.io/docs/specification/components/ for more detail.
