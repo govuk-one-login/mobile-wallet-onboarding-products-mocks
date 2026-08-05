@@ -409,6 +409,8 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
+            - Name: IMPOSTER_FEATURES
+              Value: metrics=false
             - Name: SELF_URL
               Value: !If
                 - StackNameIsWalletStsMock
@@ -434,6 +436,15 @@ Resources:
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
+          ReadonlyRootFilesystem: true
+          LinuxParameters:
+            Tmpfs:
+              - ContainerPath: /tmp
+                Size: 128
+                MountOptions:
+                  - rw
+                  - noexec
+                  - nosuid
           LogConfiguration:
             LogDriver: awslogs
             Options:
