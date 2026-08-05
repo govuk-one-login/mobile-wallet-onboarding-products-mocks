@@ -176,8 +176,7 @@ Resources:
             Resource:
               - !Sub arn:aws:s3:::${AccessLogsBucket}/sts-mock-${Environment}/AWSLogs/${AWS::AccountId}/*
           - Effect: Deny
-            Principal:
-              AWS: '*'
+            Principal: '*'
             Action: '*'
             Resource: !Sub
               - arn:aws:s3:::${bucketName}/*
