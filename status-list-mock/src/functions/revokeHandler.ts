@@ -33,11 +33,7 @@ export async function handler(
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
       error: error instanceof Error ? error.message : String(error),
     });
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
-    };
+    return internalServerErrorResponse();
   }
 
   const url = new URL(uri);
@@ -46,11 +42,7 @@ export async function handler(
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
       error: "URI hostname does not match SELF_URL",
     });
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
-    };
+    return internalServerErrorResponse();
   }
 
   const objectKey = url.pathname.slice(1);
@@ -58,22 +50,14 @@ export async function handler(
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
       error: "Object key does not start with t/ prefix",
     });
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
-    };
+    return internalServerErrorResponse();
   }
 
   if (typeof idx !== "number" || !Number.isInteger(idx) || idx < 0) {
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
       error: "idx is not a non-negative integer",
     });
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
-    };
+    return internalServerErrorResponse();
   }
 
   const updatedToken = await createToken({
@@ -112,6 +96,14 @@ export function extractUriAndIndex(body: string | null): {
 
 function base64DecodeToString(value: string): string {
   return Buffer.from(value, "base64url").toString();
+}
+
+function internalServerErrorResponse(): APIGatewayProxyResult {
+  return {
+    statusCode: 500,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: "Internal server error" }),
+  };
 }
 
 export function getRevokedConfiguration(idx: number): StatusList {
