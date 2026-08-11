@@ -715,7 +715,7 @@ Resources:
                 Action:
                   - s3:GetObject
                 Resource:
-                  - !Sub ${StatusListBucket.Arn}/*
+                  - !Sub ${StatusListBucket.Arn}/t/*
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
