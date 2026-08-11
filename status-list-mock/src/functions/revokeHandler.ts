@@ -41,6 +41,18 @@ export async function handler(
   }
 
   const url = new URL(uri);
+  const parsedSelfUrl = new URL(appConfig.SELF_URL);
+  if (url.hostname !== parsedSelfUrl.hostname) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "URI hostname does not match SELF_URL",
+    });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
+  }
+
   const objectKey = url.pathname.slice(1);
   const updatedToken = await createToken({
     selfUrl: appConfig.SELF_URL,

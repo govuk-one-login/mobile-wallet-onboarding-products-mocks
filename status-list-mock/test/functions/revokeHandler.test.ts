@@ -142,6 +142,29 @@ describe("handler", () => {
       expect.objectContaining({ error: expect.any(String) }),
     );
   });
+
+  it("should return 500 when URI hostname does not match SELF_URL", async () => {
+    const payload = Buffer.from(
+      JSON.stringify({
+        uri: "https://evil-host.com/t/36940190-e6af-42d0-9181-74c944dc4af7",
+        idx: 0,
+      }),
+    ).toString("base64url");
+    const event = {
+      body: `header.${payload}.signature`,
+    } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
 });
 
 describe("extractUriAndIndex", () => {
