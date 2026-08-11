@@ -2,12 +2,25 @@ openapi: 3.0.0
 info:
   title: Status List Mock API
   version: 1.0.0
+x-amazon-apigateway-request-validators:
+  content-type-only:
+    validateRequestBody: false
+    validateRequestParameters: true
 paths:
   /issue:
     post:
       tags:
         - issue
       description: Endpoint to issue credentials
+      parameters:
+        - in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+            enum:
+              - application/jwt
+      x-amazon-apigateway-request-validator: content-type-only
       requestBody:
         content:
           application/jwt:
@@ -57,6 +70,15 @@ paths:
   /revoke:
     post:
       description: Endpoint to revoke credentials
+      parameters:
+        - in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+            enum:
+              - application/jwt
+      x-amazon-apigateway-request-validator: content-type-only
       requestBody:
         content:
           application/jwt:
