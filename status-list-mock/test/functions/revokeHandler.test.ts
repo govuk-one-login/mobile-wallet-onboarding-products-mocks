@@ -16,6 +16,7 @@ jest.mock("../../src/logging/logger", () => ({
   logger: {
     addContext: jest.fn(),
     info: jest.fn(),
+    error: jest.fn(),
   },
 }));
 jest.mock("ecdsa-sig-formatter");
@@ -74,6 +75,71 @@ describe("handler", () => {
     jest.mocked(putObject).mockRejectedValue(new Error("S3 upload failed"));
     await expect(handler(mockEvent, mockContext)).rejects.toThrow(
       "S3 upload failed",
+    );
+  });
+
+  it("should return 500 when JWT has no dot delimiters", async () => {
+    const event = { body: "not-a-jwt" } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when JWT payload is not valid base64", async () => {
+    const event = {
+      body: "header.!!!invalid-base64!!!.signature",
+    } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when JWT payload is not valid JSON", async () => {
+    const notJson = Buffer.from("not json at all").toString("base64url");
+    const event = {
+      body: `header.${notJson}.signature`,
+    } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when request body is null", async () => {
+    const event = { body: null } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
     );
   });
 });

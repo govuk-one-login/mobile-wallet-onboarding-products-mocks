@@ -25,7 +25,21 @@ export async function handler(
 
   const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const { uri, idx } = extractUriAndIndex(event.body);
+  let uri: string;
+  let idx: number;
+  try {
+    ({ uri, idx } = extractUriAndIndex(event.body));
+  } catch (error) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
+  }
+
   const url = new URL(uri);
   const objectKey = url.pathname.slice(1);
   const updatedToken = await createToken({
