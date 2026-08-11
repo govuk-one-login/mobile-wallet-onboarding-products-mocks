@@ -54,6 +54,17 @@ export async function handler(
   }
 
   const objectKey = url.pathname.slice(1);
+  if (!objectKey.startsWith("t/")) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "Object key does not start with t/ prefix",
+    });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
+  }
+
   const updatedToken = await createToken({
     selfUrl: appConfig.SELF_URL,
     statusList: getRevokedConfiguration(idx),
