@@ -25,6 +25,12 @@ export class LogMessage implements LogAttributes {
     "N/A",
   );
 
+  static readonly REVOKE_VALIDATION_FAILED = new LogMessage(
+    "REVOKE_VALIDATION_FAILED",
+    "Revoke request validation failed.",
+    "N/A",
+  );
+
   static readonly JWKS_LAMBDA_STARTED = new LogMessage(
     "JWKS_LAMBDA_STARTED",
     "JWKS Lambda handler processing has started.",
