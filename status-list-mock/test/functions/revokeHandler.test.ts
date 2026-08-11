@@ -27,7 +27,7 @@ process.env.SELF_URL = "https://test-status-list.com";
 
 describe("handler", () => {
   const jwt =
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnb3YudWsiLCJpYXQiOjE3NTY0NTcxMjAsImV4cCI6MTc4Nzk5MzEyMCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsImlkeCI6IjAiLCJ1cmkiOiJodHRwczovL3Rlc3Qtc3RhdHVzLWxpc3QuY29tL3QvMzY5NDAxOTAtZTZhZi00MmQwLTkxODEtNzRjOTQ0ZGM0YWY3In0.J-7oGoyXoTh8ljXiRpFs-xSikAV1lYAD5f1npp9dmVU";
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnb3YudWsiLCJpYXQiOjE3NTY0NTcxMjAsImV4cCI6MTc4Nzk5MzEyMCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsImlkeCI6MCwidXJpIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyJ9.signature";
 
   const mockEvent = { body: jwt } as APIGatewayProxyEvent;
   const mockContext = {} as Context;
@@ -60,7 +60,7 @@ describe("handler", () => {
     expect(putObject).toHaveBeenCalledWith(
       "test-bucket-name",
       "t/36940190-e6af-42d0-9181-74c944dc4af7",
-      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NjA0NDcyMTgsImV4cCI6MTc2MzAzOTIxOCwiaXNzIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbSIsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcVRTd2NBQUtVQWhnIn0sInN1YiI6Imh0dHBzOi8vdGVzdC1zdGF0dXMtbGlzdC5jb20vdC8zNjk0MDE5MC1lNmFmLTQyZDAtOTE4MS03NGM5NDRkYzRhZjciLCJ0dGwiOjI1OTIwMDB9.mockJoseSignature",
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NjA0NDcyMTgsImV4cCI6MTc2MzAzOTIxOCwiaXNzIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbSIsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcHpkQUVBQU1nQWhnIn0sInN1YiI6Imh0dHBzOi8vdGVzdC1zdGF0dXMtbGlzdC5jb20vdC8zNjk0MDE5MC1lNmFmLTQyZDAtOTE4MS03NGM5NDRkYzRhZjciLCJ0dGwiOjI1OTIwMDB9.mockJoseSignature",
     );
     expect(logger.addContext).toHaveBeenCalledWith(mockContext);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.REVOKE_LAMBDA_STARTED);
@@ -171,6 +171,75 @@ describe("handler", () => {
       JSON.stringify({
         uri: "https://test-status-list.com/malicious/path",
         idx: 0,
+      }),
+    ).toString("base64url");
+    const event = {
+      body: `header.${payload}.signature`,
+    } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when idx is a string", async () => {
+    const payload = Buffer.from(
+      JSON.stringify({
+        uri: "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7",
+        idx: "0",
+      }),
+    ).toString("base64url");
+    const event = {
+      body: `header.${payload}.signature`,
+    } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when idx is a negative number", async () => {
+    const payload = Buffer.from(
+      JSON.stringify({
+        uri: "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7",
+        idx: -1,
+      }),
+    ).toString("base64url");
+    const event = {
+      body: `header.${payload}.signature`,
+    } as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when idx is a float", async () => {
+    const payload = Buffer.from(
+      JSON.stringify({
+        uri: "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7",
+        idx: 1.5,
       }),
     ).toString("base64url");
     const event = {

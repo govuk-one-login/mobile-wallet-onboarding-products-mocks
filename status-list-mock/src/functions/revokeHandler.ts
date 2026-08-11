@@ -65,6 +65,17 @@ export async function handler(
     };
   }
 
+  if (typeof idx !== "number" || !Number.isInteger(idx) || idx < 0) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "idx is not a non-negative integer",
+    });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
+  }
+
   const updatedToken = await createToken({
     selfUrl: appConfig.SELF_URL,
     statusList: getRevokedConfiguration(idx),
