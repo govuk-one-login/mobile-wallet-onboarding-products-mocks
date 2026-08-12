@@ -25,6 +25,14 @@ export async function handler(
 
   const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
+  const contentType = event.headers?.["content-type"];
+  if (contentType !== "application/jwt") {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "Content-Type is not application/jwt",
+    });
+    return internalServerErrorResponse();
+  }
+
   let uri: string;
   let idx: number;
   try {

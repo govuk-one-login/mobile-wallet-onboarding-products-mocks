@@ -29,7 +29,10 @@ describe("handler", () => {
   const jwt =
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnb3YudWsiLCJpYXQiOjE3NTY0NTcxMjAsImV4cCI6MTc4Nzk5MzEyMCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsImlkeCI6MCwidXJpIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyJ9.signature";
 
-  const mockEvent = { body: jwt } as APIGatewayProxyEvent;
+  const mockEvent = {
+    body: jwt,
+    headers: { "content-type": "application/jwt" },
+  } as unknown as APIGatewayProxyEvent;
   const mockContext = {} as Context;
   const mockTimestamp = 1760447218294;
 
@@ -43,6 +46,42 @@ describe("handler", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it("should return 500 when Content-Type is not application/jwt", async () => {
+    const event = {
+      body: jwt,
+      headers: { "content-type": "application/json" },
+    } as unknown as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when Content-Type header is missing", async () => {
+    const event = {
+      body: jwt,
+      headers: {},
+    } as unknown as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
   });
 
   it("should return 202 response with expected body", async () => {

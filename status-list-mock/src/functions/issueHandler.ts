@@ -23,11 +23,23 @@ interface Configuration {
 }
 
 export async function handler(
-  _event: APIGatewayProxyEvent,
+  event: APIGatewayProxyEvent,
   context: Context,
 ): Promise<APIGatewayProxyResult> {
   logger.addContext(context);
   logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
+
+  const contentType = event.headers?.["content-type"];
+  if (contentType !== "application/jwt") {
+    logger.error(LogMessage.ISSUE_VALIDATION_FAILED, {
+      error: "Content-Type is not application/jwt",
+    });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
+  }
 
   const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 

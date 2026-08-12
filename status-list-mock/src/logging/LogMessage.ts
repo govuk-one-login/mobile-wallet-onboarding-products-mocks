@@ -13,6 +13,12 @@ export class LogMessage implements LogAttributes {
     "N/A",
   );
 
+  static readonly ISSUE_VALIDATION_FAILED = new LogMessage(
+    "ISSUE_VALIDATION_FAILED",
+    "Issue request validation failed.",
+    "N/A",
+  );
+
   static readonly REVOKE_LAMBDA_STARTED = new LogMessage(
     "REVOKE_LAMBDA_STARTED",
     "Revoke Lambda handler processing has started.",
