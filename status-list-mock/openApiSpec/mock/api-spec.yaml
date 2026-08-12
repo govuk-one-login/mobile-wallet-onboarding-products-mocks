@@ -2,25 +2,12 @@ openapi: 3.0.0
 info:
   title: Status List Mock API
   version: 1.0.0
-x-amazon-apigateway-request-validators:
-  content-type-only:
-    validateRequestBody: false
-    validateRequestParameters: true
 paths:
   /issue:
     post:
       tags:
         - issue
       description: Endpoint to issue credentials
-      parameters:
-        - in: header
-          name: Content-Type
-          required: true
-          schema:
-            type: string
-            enum:
-              - application/jwt
-      x-amazon-apigateway-request-validator: content-type-only
       requestBody:
         content:
           application/jwt:
@@ -59,26 +46,13 @@ paths:
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
-        requestTemplates:
-          application/jwt:
-            statusCode: 200
         httpMethod: "POST"
-        passthroughBehavior: "when_no_match"
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${IssueFunction}:live/invocations"
         type: "aws_proxy"
   /revoke:
     post:
       description: Endpoint to revoke credentials
-      parameters:
-        - in: header
-          name: Content-Type
-          required: true
-          schema:
-            type: string
-            enum:
-              - application/jwt
-      x-amazon-apigateway-request-validator: content-type-only
       requestBody:
         content:
           application/jwt:
@@ -121,11 +95,7 @@ paths:
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
-        requestTemplates:
-          application/jwt:
-            statusCode: 202
         httpMethod: "POST"
-        passthroughBehavior: "when_no_match"
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${RevokeFunction}:live/invocations"
         type: "aws_proxy"
