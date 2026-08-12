@@ -118,7 +118,10 @@ describe("handler", () => {
   });
 
   it("should return 500 when JWT has no dot delimiters", async () => {
-    const event = { body: "not-a-jwt" } as APIGatewayProxyEvent;
+    const event = {
+      body: "not-a-jwt",
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -135,7 +138,8 @@ describe("handler", () => {
   it("should return 500 when JWT payload is not valid base64", async () => {
     const event = {
       body: "header.!!!invalid-base64!!!.signature",
-    } as APIGatewayProxyEvent;
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -153,7 +157,8 @@ describe("handler", () => {
     const notJson = Buffer.from("not json at all").toString("base64url");
     const event = {
       body: `header.${notJson}.signature`,
-    } as APIGatewayProxyEvent;
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -168,7 +173,10 @@ describe("handler", () => {
   });
 
   it("should return 500 when request body is null", async () => {
-    const event = { body: null } as APIGatewayProxyEvent;
+    const event = {
+      body: null,
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -191,7 +199,8 @@ describe("handler", () => {
     ).toString("base64url");
     const event = {
       body: `header.${payload}.signature`,
-    } as APIGatewayProxyEvent;
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -214,7 +223,8 @@ describe("handler", () => {
     ).toString("base64url");
     const event = {
       body: `header.${payload}.signature`,
-    } as APIGatewayProxyEvent;
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -237,7 +247,8 @@ describe("handler", () => {
     ).toString("base64url");
     const event = {
       body: `header.${payload}.signature`,
-    } as APIGatewayProxyEvent;
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -260,7 +271,8 @@ describe("handler", () => {
     ).toString("base64url");
     const event = {
       body: `header.${payload}.signature`,
-    } as APIGatewayProxyEvent;
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
@@ -283,7 +295,8 @@ describe("handler", () => {
     ).toString("base64url");
     const event = {
       body: `header.${payload}.signature`,
-    } as APIGatewayProxyEvent;
+      headers: { "content-type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
     const result = await handler(event, mockContext);
 
     expect(result).toEqual({
