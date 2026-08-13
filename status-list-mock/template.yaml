@@ -263,6 +263,7 @@ Resources:
       Handler: src/functions/issueHandler.handler
       Role: !GetAtt IssueFunctionLambdaRole.Arn
       ReservedConcurrentExecutions: 5
+      Tracing: Active
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -289,6 +290,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
         - PolicyName: LoggingPolicy
           PolicyDocument:
@@ -381,6 +383,7 @@ Resources:
       Handler: src/functions/revokeHandler.handler
       Role: !GetAtt RevokeFunctionLambdaRole.Arn
       ReservedConcurrentExecutions: 5
+      Tracing: Active
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: Revoke
@@ -417,6 +420,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
         - PolicyName: LoggingPolicy
           PolicyDocument:
@@ -507,6 +511,7 @@ Resources:
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
       ReservedConcurrentExecutions: 5
+      Tracing: Active
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -546,6 +551,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
         - PolicyName: LoggingPolicy
           PolicyDocument:
