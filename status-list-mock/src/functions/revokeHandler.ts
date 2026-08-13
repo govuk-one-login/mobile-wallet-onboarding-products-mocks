@@ -23,28 +23,37 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.REVOKE_LAMBDA_STARTED);
 
-  const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
+  try {
+    const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const { uri, idx } = extractUriAndIndex(event.body);
-  const url = new URL(uri);
-  const objectKey = url.pathname.slice(1);
-  const updatedToken = await createToken({
-    selfUrl: appConfig.SELF_URL,
-    statusList: getRevokedConfiguration(idx),
-    uri,
-    keyId: appConfig.SIGNING_KEY_ID,
-  });
-  await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, updatedToken);
+    const { uri, idx } = extractUriAndIndex(event.body);
+    const url = new URL(uri);
+    const objectKey = url.pathname.slice(1);
+    const updatedToken = await createToken({
+      selfUrl: appConfig.SELF_URL,
+      statusList: getRevokedConfiguration(idx),
+      uri,
+      keyId: appConfig.SIGNING_KEY_ID,
+    });
+    await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, updatedToken);
 
-  logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
-  return {
-    statusCode: 202,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: "Request processed for revocation",
-      revokedAt: Math.floor(Date.now() / 1000),
-    }),
-  };
+    logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
+    return {
+      statusCode: 202,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "Request processed for revocation",
+        revokedAt: Math.floor(Date.now() / 1000),
+      }),
+    };
+  } catch (error) {
+    logger.error(LogMessage.REVOKE_LAMBDA_ERROR, { error });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 }
 export function extractUriAndIndex(body: string | null): {
   uri: string;

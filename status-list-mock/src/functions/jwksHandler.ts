@@ -16,20 +16,24 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.JWKS_LAMBDA_STARTED);
 
-  const config = getConfig(process.env, REQUIRED_ENV_VARS);
+  try {
+    const config = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const keyId = config.SIGNING_KEY_ID;
-  const publicKey = await getPublicKey(keyId);
-  const jwk: JWK = convertToJwk(publicKey, keyId);
-  const jwks: JWKS = { keys: [jwk] };
+    const keyId = config.SIGNING_KEY_ID;
+    const publicKey = await getPublicKey(keyId);
+    const jwk: JWK = convertToJwk(publicKey, keyId);
+    const jwks: JWKS = { keys: [jwk] };
 
-  await putObject(
-    config.JWKS_BUCKET_NAME,
-    ".well-known/jwks.json",
-    JSON.stringify(jwks),
-  );
+    await putObject(
+      config.JWKS_BUCKET_NAME,
+      ".well-known/jwks.json",
+      JSON.stringify(jwks),
+    );
 
-  logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
+    logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
+  } catch (error) {
+    logger.error(LogMessage.JWKS_LAMBDA_ERROR, { error });
+  }
 }
 
 function convertToJwk(spki: Uint8Array<ArrayBufferLike>, keyId: string): JWK {

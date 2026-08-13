@@ -29,29 +29,38 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
 
-  const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
+  try {
+    const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const configuration = getRandomConfig();
-  const objectKey = "t/" + randomUUID();
-  const uri = `${appConfig.SELF_URL}/${objectKey}`;
-  const token = await createToken({
-    selfUrl: appConfig.SELF_URL,
-    statusList: configuration.statusList,
-    uri,
-    keyId: appConfig.SIGNING_KEY_ID,
-  });
-  await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, token);
+    const configuration = getRandomConfig();
+    const objectKey = "t/" + randomUUID();
+    const uri = `${appConfig.SELF_URL}/${objectKey}`;
+    const token = await createToken({
+      selfUrl: appConfig.SELF_URL,
+      statusList: configuration.statusList,
+      uri,
+      keyId: appConfig.SIGNING_KEY_ID,
+    });
+    await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, token);
 
-  logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
+    logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      idx: configuration.index,
-      uri: uri,
-    }),
-  };
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idx: configuration.index,
+        uri: uri,
+      }),
+    };
+  } catch (error) {
+    logger.error(LogMessage.ISSUE_LAMBDA_ERROR, { error });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 }
 
 function getRandomConfig(): Configuration {
