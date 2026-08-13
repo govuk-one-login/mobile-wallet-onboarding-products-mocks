@@ -7,6 +7,8 @@ SELF_URL = System.getenv('SELF_URL') ?: "http://localhost:9090"
 
 println "Raw token request body: ${context.request.body}"
 
+try {
+
 def params = parseUrlEncodedBody(context.request.body)
 def grantType = params['grant_type']
 println "Received request with grant_type: ${grantType}"
@@ -86,6 +88,12 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     ]
 
     respond().withData(JsonOutput.toJson(responseBody))
+}
+
+} catch (Exception e) {
+    println "Error processing token request: ${e.message}"
+    def errorBody = JsonOutput.toJson([error: "invalid_request", error_description: "Invalid request"])
+    respond().withStatusCode(400).withData(errorBody)
 }
 
 /**
