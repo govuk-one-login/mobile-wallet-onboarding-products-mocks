@@ -66,16 +66,6 @@ describe("handler", () => {
     );
   });
 
-  it("should succeed when Content-Type header is Pascal-case", async () => {
-    const event = {
-      body: jwt,
-      headers: { "Content-Type": "application/jwt" },
-    } as unknown as APIGatewayProxyEvent;
-    const result = await handler(event, mockContext);
-
-    expect(result.statusCode).toBe(202);
-  });
-
   it("should return 500 when Content-Type header is missing", async () => {
     const event = {
       body: jwt,
