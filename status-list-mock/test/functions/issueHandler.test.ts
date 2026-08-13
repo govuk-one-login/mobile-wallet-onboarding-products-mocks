@@ -14,6 +14,7 @@ jest.mock("../../src/logging/logger", () => ({
   logger: {
     addContext: jest.fn(),
     info: jest.fn(),
+    error: jest.fn(),
   },
 }));
 jest.mock("ecdsa-sig-formatter");
@@ -64,17 +65,31 @@ describe("handler", () => {
     expect(logger.info).toHaveBeenCalledTimes(2);
   });
 
-  it("should propagate errors during S3 upload", async () => {
-    jest.mocked(putObject).mockRejectedValue(new Error("S3 upload failed"));
-    await expect(handler(mockEvent, mockContext)).rejects.toThrow(
-      "S3 upload failed",
-    );
+  it("should return 500 and log error when S3 upload fails", async () => {
+    const s3Error = new Error("S3 upload failed");
+    jest.mocked(putObject).mockRejectedValue(s3Error);
+    const result = await handler(mockEvent, mockContext);
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_ERROR, {
+      error: s3Error,
+    });
   });
 
-  it("should propagate errors throwing by sign function", async () => {
-    jest.mocked(sign).mockRejectedValue(new Error("Signing failed"));
-    await expect(handler(mockEvent, mockContext)).rejects.toThrow(
-      "Signing failed",
-    );
+  it("should return 500 and log error when sign function fails", async () => {
+    const signError = new Error("Signing failed");
+    jest.mocked(sign).mockRejectedValue(signError);
+    const result = await handler(mockEvent, mockContext);
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_ERROR, {
+      error: signError,
+    });
   });
 });
