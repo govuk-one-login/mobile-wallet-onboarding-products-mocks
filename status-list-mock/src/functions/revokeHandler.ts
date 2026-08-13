@@ -7,6 +7,7 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { getConfig } from "../config/getConfig";
 import { putObject } from "../common/aws/s3";
+import { getHeaderValueFromHeaders } from "../common/getHeaderValueFromHeaders";
 import { createToken } from "../common/token/createToken";
 import { StatusList } from "../common/types/statusList";
 
@@ -25,7 +26,7 @@ export async function handler(
 
   const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const contentType = event.headers?.["content-type"];
+  const contentType = getHeaderValueFromHeaders(event.headers, "content-type");
   if (contentType !== "application/jwt") {
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
       error: "Content-Type is not application/jwt",

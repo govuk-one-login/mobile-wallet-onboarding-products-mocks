@@ -101,6 +101,15 @@ describe("handler", () => {
     );
   });
 
+  it("should succeed when Content-Type header is Pascal-case", async () => {
+    const event = {
+      headers: { "Content-Type": "application/jwt" },
+    } as unknown as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result.statusCode).toBe(200);
+  });
+
   it("should propagate errors during S3 upload", async () => {
     jest.mocked(putObject).mockRejectedValue(new Error("S3 upload failed"));
     await expect(handler(mockEvent, mockContext)).rejects.toThrow(
