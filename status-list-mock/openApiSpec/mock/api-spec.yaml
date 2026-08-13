@@ -155,6 +155,8 @@ paths:
             statusCode: "500"
             responseParameters:
               method.response.header.Content-Type: "'text/plain'"
+            responseTemplates:
+              application/json: '{"error": "Internal Server Error"}'
         passthroughBehavior: "when_no_match"
         httpMethod: "GET"
         type: "aws"
@@ -236,6 +238,8 @@ paths:
             statusCode: "500"
             responseParameters:
               method.response.header.Content-Type: "'text/plain'"
+            responseTemplates:
+              application/json: '{"error": "Internal Server Error"}'
         passthroughBehavior: "when_no_match"
         httpMethod: "GET"
         type: "aws"
