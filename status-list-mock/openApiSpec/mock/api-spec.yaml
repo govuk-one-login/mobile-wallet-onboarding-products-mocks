@@ -165,6 +165,12 @@ paths:
             Cache-Control:
               schema:
                 type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -225,6 +231,8 @@ paths:
             responseParameters:
               method.response.header.Content-Type: "'application/json'"
               method.response.header.Cache-Control: "'max-age=300'"
+              method.response.header.Strict-Transport-Security: "'max-age=31536000; includeSubdomains'"
+              method.response.header.X-Content-Type-Options: "'nosniff'"
             contentHandling: "CONVERT_TO_TEXT"
           default:
             statusCode: "500"

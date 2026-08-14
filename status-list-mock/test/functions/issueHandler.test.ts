@@ -45,7 +45,12 @@ describe("handler", () => {
     const result = await handler(mockEvent, mockContext);
     expect(result).toEqual({
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=604800",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         idx: 0,
         uri: "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7",
