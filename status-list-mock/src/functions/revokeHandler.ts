@@ -7,7 +7,6 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { getConfig } from "../config/getConfig";
 import { putObject } from "../common/aws/s3";
-import { getHeaderValueFromHeaders } from "../common/getHeaderValueFromHeaders";
 import { createToken } from "../common/token/createToken";
 import { StatusList } from "../common/types/statusList";
 
@@ -74,14 +73,6 @@ export function extractUriAndIndex(body: string | null): {
 
 function base64DecodeToString(value: string): string {
   return Buffer.from(value, "base64url").toString();
-}
-
-function internalServerErrorResponse(): APIGatewayProxyResult {
-  return {
-    statusCode: 500,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: "Internal server error" }),
-  };
 }
 
 export function getRevokedConfiguration(idx: number): StatusList {
