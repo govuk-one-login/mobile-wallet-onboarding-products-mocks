@@ -24,7 +24,9 @@ process.env.SELF_URL = "https://test-status-list.com";
 process.env.STATUS_LIST_BUCKET_NAME = "test-bucket-name";
 
 describe("handler", () => {
-  const mockEvent = {} as APIGatewayProxyEvent;
+  const mockEvent = {
+    headers: { "content-type": "application/jwt" },
+  } as unknown as APIGatewayProxyEvent;
   const mockContext = {} as Context;
 
   beforeEach(() => {

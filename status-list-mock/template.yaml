@@ -622,7 +622,7 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !Sub di-s3-access-logs-${AWS::AccountId}-${AWS::Region}
         TargetObjectKeyFormat:
           PartitionedPrefix:
             PartitionDateSource: EventTime
@@ -698,7 +698,7 @@ Resources:
             ExpirationInDays: 30
             Status: Enabled
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !Sub di-s3-access-logs-${AWS::AccountId}-${AWS::Region}
         TargetObjectKeyFormat:
           PartitionedPrefix:
             PartitionDateSource: EventTime
@@ -741,7 +741,7 @@ Resources:
                 Action:
                   - s3:GetObject
                 Resource:
-                  - !Sub ${StatusListBucket.Arn}/*
+                  - !Sub ${StatusListBucket.Arn}/t/*
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
