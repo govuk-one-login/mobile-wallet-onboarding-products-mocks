@@ -42,10 +42,6 @@ Mappings:
       SelfUrl: sts-mock.wallet-onboarding.integration.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:899032468188:repository/sts-mock-image-repo-containerrepository-c47qvuediwmo
 
-  ElasticLoadBalancerAccountIds:
-    eu-west-2:
-      AccountId: 652711504416
-
 Conditions:
   UsePermissionsBoundary: !Not
     - !Equals
@@ -134,57 +130,6 @@ Resources:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-ecs
       RetentionInDays: 14
 
-  AccessLogsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub ${AWS::StackName}-${Environment}-access-logs
-      VersioningConfiguration:
-        Status: Enabled
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
-        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
-        TargetObjectKeyFormat:
-          PartitionedPrefix:
-            PartitionDateSource: EventTime
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-
-  AccessLogsBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref AccessLogsBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub
-                - arn:aws:iam::${ElbAccountId}:root
-                - ElbAccountId: !FindInMap
-                    - ElasticLoadBalancerAccountIds
-                    - !Ref AWS::Region
-                    - AccountId
-            Action:
-              - s3:PutObject
-            Resource:
-              - !Sub arn:aws:s3:::${AccessLogsBucket}/sts-mock-${Environment}/AWSLogs/${AWS::AccountId}/*
-          - Effect: Deny
-            Principal: '*'
-            Action: '*'
-            Resource: !Sub
-              - arn:aws:s3:::${bucketName}/*
-              - bucketName: !Ref AccessLogsBucket
-            Condition:
-              Bool:
-                aws:SecureTransport: false
-
   LoadBalancer:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
@@ -205,7 +150,7 @@ Resources:
         - Key: access_logs.s3.enabled
           Value: true
         - Key: access_logs.s3.bucket
-          Value: !Ref AccessLogsBucket
+          Value: !Sub di-lb-access-logs-${AWS::AccountId}-${AWS::Region}
         - Key: access_logs.s3.prefix
           Value: !Sub sts-mock-${Environment}
         - Key: idle_timeout.timeout_seconds
