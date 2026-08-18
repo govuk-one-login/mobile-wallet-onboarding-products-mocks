@@ -36,8 +36,10 @@ export async function handler(
 
   let uri: string;
   let idx: number;
+  let url: URL;
   try {
     ({ uri, idx } = extractUriAndIndex(event.body));
+    url = new URL(uri);
   } catch (error) {
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
       error: error instanceof Error ? error.message : String(error),
@@ -45,7 +47,6 @@ export async function handler(
     return internalServerErrorResponse();
   }
 
-  const url = new URL(uri);
   const parsedSelfUrl = new URL(appConfig.SELF_URL);
   if (url.hostname !== parsedSelfUrl.hostname) {
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
