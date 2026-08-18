@@ -14,6 +14,7 @@ jest.mock("../../src/logging/logger", () => ({
   logger: {
     addContext: jest.fn(),
     info: jest.fn(),
+    error: jest.fn(),
   },
 }));
 jest.mock("ecdsa-sig-formatter");
@@ -23,7 +24,9 @@ process.env.SELF_URL = "https://test-status-list.com";
 process.env.STATUS_LIST_BUCKET_NAME = "test-bucket-name";
 
 describe("handler", () => {
-  const mockEvent = {} as APIGatewayProxyEvent;
+  const mockEvent = {
+    headers: { "content-type": "application/jwt" },
+  } as unknown as APIGatewayProxyEvent;
   const mockContext = {} as Context;
 
   beforeEach(() => {
@@ -62,6 +65,40 @@ describe("handler", () => {
     expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_STARTED);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_COMPLETED);
     expect(logger.info).toHaveBeenCalledTimes(2);
+  });
+
+  it("should return 500 when Content-Type is not application/jwt", async () => {
+    const event = {
+      headers: { "content-type": "application/json" },
+    } as unknown as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.ISSUE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when Content-Type header is missing", async () => {
+    const event = {
+      headers: {},
+    } as unknown as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.ISSUE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
   });
 
   it("should propagate errors during S3 upload", async () => {

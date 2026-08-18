@@ -46,11 +46,7 @@ paths:
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
-        requestTemplates:
-          application/jwt:
-            statusCode: 200
         httpMethod: "POST"
-        passthroughBehavior: "when_no_match"
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${IssueFunction}:live/invocations"
         type: "aws_proxy"
@@ -99,11 +95,7 @@ paths:
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
-        requestTemplates:
-          application/jwt:
-            statusCode: 202
         httpMethod: "POST"
-        passthroughBehavior: "when_no_match"
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${RevokeFunction}:live/invocations"
         type: "aws_proxy"

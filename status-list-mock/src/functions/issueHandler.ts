@@ -7,6 +7,7 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { randomUUID } from "node:crypto";
 import { putObject } from "../common/aws/s3";
+import { getHeaderValueFromHeaders } from "../common/getHeaderValueFromHeaders";
 import { getConfig } from "../config/getConfig";
 import { createToken } from "../common/token/createToken";
 import { StatusList } from "../common/types/statusList";
@@ -23,11 +24,23 @@ interface Configuration {
 }
 
 export async function handler(
-  _event: APIGatewayProxyEvent,
+  event: APIGatewayProxyEvent,
   context: Context,
 ): Promise<APIGatewayProxyResult> {
   logger.addContext(context);
   logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
+
+  const contentType = getHeaderValueFromHeaders(event.headers, "content-type");
+  if (contentType !== "application/jwt") {
+    logger.error(LogMessage.ISSUE_VALIDATION_FAILED, {
+      error: "Content-Type is not application/jwt",
+    });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
+  }
 
   const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
