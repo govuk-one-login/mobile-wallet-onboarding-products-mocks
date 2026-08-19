@@ -40,7 +40,10 @@ export async function handler(
     return {
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     };
   }
 }

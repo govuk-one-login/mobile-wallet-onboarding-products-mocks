@@ -76,7 +76,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.ISSUE_VALIDATION_FAILED,
@@ -93,7 +96,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.ISSUE_VALIDATION_FAILED,
@@ -108,7 +114,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_ERROR, {
       error: s3Error,
@@ -122,7 +131,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_ERROR, {
       error: signError,
