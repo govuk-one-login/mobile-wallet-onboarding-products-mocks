@@ -148,7 +148,7 @@ paths:
             responseParameters:
               method.response.header.Content-Type: "'text/plain'"
             responseTemplates:
-              application/json: '{"error": "Internal Server Error"}'
+              application/json: '{"message": "Internal server error"}'
         passthroughBehavior: "when_no_match"
         httpMethod: "GET"
         type: "aws"
@@ -231,7 +231,7 @@ paths:
             responseParameters:
               method.response.header.Content-Type: "'text/plain'"
             responseTemplates:
-              application/json: '{"error": "Internal Server Error"}'
+              application/json: '{"message": "Internal server error"}'
         passthroughBehavior: "when_no_match"
         httpMethod: "GET"
         type: "aws"

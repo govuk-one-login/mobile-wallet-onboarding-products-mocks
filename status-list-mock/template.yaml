@@ -182,7 +182,7 @@ Resources:
       RestApiId: !Ref Api
       ResponseType: DEFAULT_4XX
       ResponseTemplates:
-        application/json: '{"error": "Request Error"}'
+        application/json: '{"message": "Request Error"}'
 
   ApiGateway5xxResponse:
     Type: AWS::ApiGateway::GatewayResponse
