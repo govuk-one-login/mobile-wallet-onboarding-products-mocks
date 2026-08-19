@@ -1,4 +1,8 @@
-import { APIGatewayProxyEvent, Context } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from "aws-lambda";
 import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import crypto from "node:crypto";
@@ -12,7 +16,7 @@ const REQUIRED_ENV_VARS = ["SIGNING_KEY_ID", "JWKS_BUCKET_NAME"] as const;
 export async function handler(
   _event: APIGatewayProxyEvent,
   context: Context,
-): Promise<void> {
+): Promise<void | APIGatewayProxyResult> {
   logger.addContext(context);
   logger.info(LogMessage.JWKS_LAMBDA_STARTED);
 
@@ -33,6 +37,11 @@ export async function handler(
     logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
   } catch (error) {
     logger.error(LogMessage.JWKS_LAMBDA_ERROR, { error });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
   }
 }
 

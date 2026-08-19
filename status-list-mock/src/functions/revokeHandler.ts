@@ -7,6 +7,7 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { getConfig } from "../config/getConfig";
 import { putObject } from "../common/aws/s3";
+import { getHeaderValueFromHeaders } from "../common/getHeaderValueFromHeaders";
 import { createToken } from "../common/token/createToken";
 import { StatusList } from "../common/types/statusList";
 
@@ -23,12 +24,53 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.REVOKE_LAMBDA_STARTED);
 
-  try {
-    const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
+  const contentType = getHeaderValueFromHeaders(event.headers, "content-type");
+  if (contentType !== "application/jwt") {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "Content-Type is not application/jwt",
+    });
+    return internalServerErrorResponse();
+  }
 
-    const { uri, idx } = extractUriAndIndex(event.body);
-    const url = new URL(uri);
-    const objectKey = url.pathname.slice(1);
+  let uri: string;
+  let idx: number;
+  let url: URL;
+  try {
+    ({ uri, idx } = extractUriAndIndex(event.body));
+    url = new URL(uri);
+  } catch (error) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return internalServerErrorResponse();
+  }
+
+  const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
+
+  const parsedSelfUrl = new URL(appConfig.SELF_URL);
+  if (url.hostname !== parsedSelfUrl.hostname) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "URI hostname does not match SELF_URL",
+    });
+    return internalServerErrorResponse();
+  }
+
+  const objectKey = url.pathname.slice(1);
+  if (!objectKey.startsWith("t/")) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "Object key does not start with t/ prefix",
+    });
+    return internalServerErrorResponse();
+  }
+
+  if (typeof idx !== "number" || !Number.isInteger(idx) || idx < 0) {
+    logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
+      error: "idx is not a non-negative integer",
+    });
+    return internalServerErrorResponse();
+  }
+
+  try {
     const updatedToken = await createToken({
       selfUrl: appConfig.SELF_URL,
       statusList: getRevokedConfiguration(idx),
@@ -48,11 +90,7 @@ export async function handler(
     };
   } catch (error) {
     logger.error(LogMessage.REVOKE_LAMBDA_ERROR, { error });
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
+    return internalServerErrorResponse();
   }
 }
 export function extractUriAndIndex(body: string | null): {
@@ -73,6 +111,14 @@ export function extractUriAndIndex(body: string | null): {
 
 function base64DecodeToString(value: string): string {
   return Buffer.from(value, "base64url").toString();
+}
+
+function internalServerErrorResponse(): APIGatewayProxyResult {
+  return {
+    statusCode: 500,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: "Internal server error" }),
+  };
 }
 
 export function getRevokedConfiguration(idx: number): StatusList {

@@ -190,7 +190,7 @@ Resources:
       RestApiId: !Ref Api
       ResponseType: DEFAULT_5XX
       ResponseTemplates:
-        application/json: '{"error": "Internal Server Error"}'
+        application/json: '{"message": "Internal server error"}'
 
   ApiBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping

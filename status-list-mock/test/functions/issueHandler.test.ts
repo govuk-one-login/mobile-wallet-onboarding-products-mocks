@@ -67,6 +67,40 @@ describe("handler", () => {
     expect(logger.info).toHaveBeenCalledTimes(2);
   });
 
+  it("should return 500 when Content-Type is not application/jwt", async () => {
+    const event = {
+      headers: { "content-type": "application/json" },
+    } as unknown as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.ISSUE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
+  it("should return 500 when Content-Type header is missing", async () => {
+    const event = {
+      headers: {},
+    } as unknown as APIGatewayProxyEvent;
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      LogMessage.ISSUE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+  });
+
   it("should return 500 and log error when S3 upload fails", async () => {
     const s3Error = new Error("S3 upload failed");
     jest.mocked(putObject).mockRejectedValue(s3Error);
@@ -74,7 +108,7 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ message: "Internal server error" }),
     });
     expect(logger.error).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_ERROR, {
       error: s3Error,
@@ -88,7 +122,7 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ message: "Internal server error" }),
     });
     expect(logger.error).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_ERROR, {
       error: signError,

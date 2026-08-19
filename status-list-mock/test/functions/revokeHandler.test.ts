@@ -81,7 +81,7 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ message: "Internal server error" }),
     });
     expect(logger.error).toHaveBeenCalledWith(LogMessage.REVOKE_LAMBDA_ERROR, {
       error: s3Error,
@@ -98,10 +98,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ message: "Internal server error" }),
     });
     expect(logger.error).toHaveBeenCalledWith(
-      LogMessage.REVOKE_LAMBDA_ERROR,
+      LogMessage.REVOKE_VALIDATION_FAILED,
       expect.objectContaining({ error: expect.anything() }),
     );
   });
@@ -116,11 +116,11 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ message: "Internal server error" }),
     });
     expect(logger.error).toHaveBeenCalledWith(
-      LogMessage.REVOKE_LAMBDA_ERROR,
-      expect.objectContaining({ error: expect.any(Error) }),
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
     );
   });
 
@@ -135,11 +135,11 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ message: "Internal server error" }),
     });
     expect(logger.error).toHaveBeenCalledWith(
-      LogMessage.REVOKE_LAMBDA_ERROR,
-      expect.objectContaining({ error: expect.any(Error) }),
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
     );
   });
 
@@ -153,11 +153,11 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ message: "Internal server error" }),
     });
     expect(logger.error).toHaveBeenCalledWith(
-      LogMessage.REVOKE_LAMBDA_ERROR,
-      expect.objectContaining({ error: expect.any(Error) }),
+      LogMessage.REVOKE_VALIDATION_FAILED,
+      expect.objectContaining({ error: expect.any(String) }),
     );
   });
 });
