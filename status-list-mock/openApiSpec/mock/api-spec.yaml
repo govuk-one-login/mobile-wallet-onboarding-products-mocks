@@ -120,6 +120,12 @@ paths:
             Cache-Control:
               schema:
                 type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
           content:
             application/statuslist+jwt:
               schema:
@@ -142,6 +148,8 @@ paths:
             responseParameters:
               method.response.header.Content-Type: "'application/statuslist+jwt'"
               method.response.header.Cache-Control: "'max-age=30'"
+              method.response.header.Strict-Transport-Security: "'max-age=31536000; includeSubDomains'"
+              method.response.header.X-Content-Type-Options: "'nosniff'"
             contentHandling: "CONVERT_TO_TEXT"
           default:
             statusCode: "500"
@@ -163,6 +171,12 @@ paths:
               schema:
                 type: string
             Cache-Control:
+              schema:
+                type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
               schema:
                 type: string
           content:
@@ -225,6 +239,8 @@ paths:
             responseParameters:
               method.response.header.Content-Type: "'application/json'"
               method.response.header.Cache-Control: "'max-age=300'"
+              method.response.header.Strict-Transport-Security: "'max-age=31536000; includeSubDomains'"
+              method.response.header.X-Content-Type-Options: "'nosniff'"
             contentHandling: "CONVERT_TO_TEXT"
           default:
             statusCode: "500"

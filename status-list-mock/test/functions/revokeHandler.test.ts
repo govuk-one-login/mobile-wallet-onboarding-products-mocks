@@ -57,7 +57,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -78,7 +82,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -95,7 +103,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 202,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         message: "Request processed for revocation",
         revokedAt: 1760447218,
@@ -122,7 +134,11 @@ describe("handler", () => {
     const result = await handler(mockEvent, mockContext);
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -142,7 +158,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -163,7 +183,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -185,7 +209,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -206,7 +234,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -233,7 +265,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -260,7 +296,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -287,7 +327,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -314,7 +358,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -341,7 +389,11 @@ describe("handler", () => {
 
     expect(result).toEqual({
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
