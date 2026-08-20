@@ -146,7 +146,7 @@ paths:
           default:
             statusCode: "500"
             responseParameters:
-              method.response.header.Content-Type: "'text/plain'"
+              method.response.header.Content-Type: "'application/json'"
             responseTemplates:
               application/json: '{"error": "INTERNAL_SERVER_ERROR", "error_description": "Internal server error"}'
         passthroughBehavior: "when_no_match"
@@ -229,7 +229,7 @@ paths:
           default:
             statusCode: "500"
             responseParameters:
-              method.response.header.Content-Type: "'text/plain'"
+              method.response.header.Content-Type: "'application/json'"
             responseTemplates:
               application/json: '{"error": "INTERNAL_SERVER_ERROR", "error_description": "Internal server error"}'
         passthroughBehavior: "when_no_match"
