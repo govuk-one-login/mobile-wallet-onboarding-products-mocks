@@ -82,7 +82,11 @@ export async function handler(
     logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
     return {
       statusCode: 202,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         message: "Request processed for revocation",
         revokedAt: Math.floor(Date.now() / 1000),
@@ -116,7 +120,11 @@ function base64DecodeToString(value: string): string {
 function internalServerErrorResponse(): APIGatewayProxyResult {
   return {
     statusCode: 500,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options": "nosniff",
+    },
     body: JSON.stringify({
       error: "INTERNAL_SERVER_ERROR",
       error_description: "Internal server error",

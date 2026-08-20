@@ -37,7 +37,11 @@ export async function handler(
     });
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
       body: JSON.stringify({
         error: "INTERNAL_SERVER_ERROR",
         error_description: "Internal server error",
@@ -61,19 +65,33 @@ export async function handler(
 
     logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "public, max-age=604800",
-      "Strict-Transport-Security": "max-age=31536000; includeSubdomains",
-      "X-Content-Type-Options": "nosniff",
-    },
-    body: JSON.stringify({
-      idx: configuration.index,
-      uri: uri,
-    }),
-  };
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
+      body: JSON.stringify({
+        idx: configuration.index,
+        uri: uri,
+      }),
+    };
+  } catch (error) {
+    logger.error(LogMessage.ISSUE_LAMBDA_ERROR, { error });
+    return {
+      statusCode: 500,
+      headers: {
+        "Content-Type": "application/json",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+      },
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
+    };
+  }
 }
 
 function getRandomConfig(): Configuration {
