@@ -13,6 +13,7 @@ jest.mock("../../src/logging/logger", () => ({
   logger: {
     addContext: jest.fn(),
     info: jest.fn(),
+    error: jest.fn(),
   },
 }));
 jest.mock("crypto", () => {
@@ -65,23 +66,38 @@ describe("handler", () => {
     );
   });
 
-  it("should propagate errors from getConfig", async () => {
+  it("should log error and not throw when getConfig fails", async () => {
+    const configError = new Error("Missing env var");
     jest.mocked(getConfig).mockImplementation(() => {
-      throw new Error("Missing env var");
+      throw configError;
     });
 
-    await expect(handler(event, context)).rejects.toThrow("Missing env var");
+    await handler(event, context);
+
+    expect(logger.error).toHaveBeenCalledWith(LogMessage.JWKS_LAMBDA_ERROR, {
+      error: configError,
+    });
   });
 
-  it("should propagate errors from getPublicKey", async () => {
-    jest.mocked(getPublicKey).mockRejectedValue(new Error("KMS error"));
+  it("should log error and not throw when getPublicKey fails", async () => {
+    const kmsError = new Error("KMS error");
+    jest.mocked(getPublicKey).mockRejectedValue(kmsError);
 
-    await expect(handler(event, context)).rejects.toThrow("KMS error");
+    await handler(event, context);
+
+    expect(logger.error).toHaveBeenCalledWith(LogMessage.JWKS_LAMBDA_ERROR, {
+      error: kmsError,
+    });
   });
 
-  it("should propagate errors from putObject", async () => {
-    jest.mocked(putObject).mockRejectedValue(new Error("S3 error"));
+  it("should log error and not throw when putObject fails", async () => {
+    const s3Error = new Error("S3 error");
+    jest.mocked(putObject).mockRejectedValue(s3Error);
 
-    await expect(handler(event, context)).rejects.toThrow("S3 error");
+    await handler(event, context);
+
+    expect(logger.error).toHaveBeenCalledWith(LogMessage.JWKS_LAMBDA_ERROR, {
+      error: s3Error,
+    });
   });
 });

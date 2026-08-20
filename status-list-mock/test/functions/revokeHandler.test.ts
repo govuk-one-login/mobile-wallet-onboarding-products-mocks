@@ -58,7 +58,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -76,7 +79,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -110,11 +116,21 @@ describe("handler", () => {
     expect(Date.now).toHaveBeenCalledTimes(2);
   });
 
-  it("should propagate errors during S3 upload", async () => {
-    jest.mocked(putObject).mockRejectedValue(new Error("S3 upload failed"));
-    await expect(handler(mockEvent, mockContext)).rejects.toThrow(
-      "S3 upload failed",
-    );
+  it("should return 500 and log error when S3 upload fails", async () => {
+    const s3Error = new Error("S3 upload failed");
+    jest.mocked(putObject).mockRejectedValue(s3Error);
+    const result = await handler(mockEvent, mockContext);
+    expect(result).toEqual({
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
+    });
+    expect(logger.error).toHaveBeenCalledWith(LogMessage.REVOKE_LAMBDA_ERROR, {
+      error: s3Error,
+    });
   });
 
   it("should return 500 when JWT has no dot delimiters", async () => {
@@ -127,7 +143,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -145,7 +164,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -164,7 +186,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -182,7 +207,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -206,7 +234,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -230,7 +261,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -254,7 +288,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -278,7 +315,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,
@@ -302,7 +342,10 @@ describe("handler", () => {
     expect(result).toEqual({
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal server error" }),
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       LogMessage.REVOKE_VALIDATION_FAILED,

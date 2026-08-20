@@ -1,4 +1,8 @@
-import { APIGatewayProxyEvent, Context } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from "aws-lambda";
 import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import crypto from "node:crypto";
@@ -12,24 +16,36 @@ const REQUIRED_ENV_VARS = ["SIGNING_KEY_ID", "JWKS_BUCKET_NAME"] as const;
 export async function handler(
   _event: APIGatewayProxyEvent,
   context: Context,
-): Promise<void> {
+): Promise<void | APIGatewayProxyResult> {
   logger.addContext(context);
   logger.info(LogMessage.JWKS_LAMBDA_STARTED);
 
-  const config = getConfig(process.env, REQUIRED_ENV_VARS);
+  try {
+    const config = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const keyId = config.SIGNING_KEY_ID;
-  const publicKey = await getPublicKey(keyId);
-  const jwk: JWK = convertToJwk(publicKey, keyId);
-  const jwks: JWKS = { keys: [jwk] };
+    const keyId = config.SIGNING_KEY_ID;
+    const publicKey = await getPublicKey(keyId);
+    const jwk: JWK = convertToJwk(publicKey, keyId);
+    const jwks: JWKS = { keys: [jwk] };
 
-  await putObject(
-    config.JWKS_BUCKET_NAME,
-    ".well-known/jwks.json",
-    JSON.stringify(jwks),
-  );
+    await putObject(
+      config.JWKS_BUCKET_NAME,
+      ".well-known/jwks.json",
+      JSON.stringify(jwks),
+    );
 
-  logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
+    logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
+  } catch (error) {
+    logger.error(LogMessage.JWKS_LAMBDA_ERROR, { error });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
+    };
+  }
 }
 
 function convertToJwk(spki: Uint8Array<ArrayBufferLike>, keyId: string): JWK {

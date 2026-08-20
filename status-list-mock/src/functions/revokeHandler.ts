@@ -24,8 +24,6 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.REVOKE_LAMBDA_STARTED);
 
-  const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
-
   const contentType = getHeaderValueFromHeaders(event.headers, "content-type");
   if (contentType !== "application/jwt") {
     logger.error(LogMessage.REVOKE_VALIDATION_FAILED, {
@@ -46,6 +44,8 @@ export async function handler(
     });
     return internalServerErrorResponse();
   }
+
+  const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
   const parsedSelfUrl = new URL(appConfig.SELF_URL);
   if (url.hostname !== parsedSelfUrl.hostname) {
@@ -70,23 +70,28 @@ export async function handler(
     return internalServerErrorResponse();
   }
 
-  const updatedToken = await createToken({
-    selfUrl: appConfig.SELF_URL,
-    statusList: getRevokedConfiguration(idx),
-    uri,
-    keyId: appConfig.SIGNING_KEY_ID,
-  });
-  await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, updatedToken);
+  try {
+    const updatedToken = await createToken({
+      selfUrl: appConfig.SELF_URL,
+      statusList: getRevokedConfiguration(idx),
+      uri,
+      keyId: appConfig.SIGNING_KEY_ID,
+    });
+    await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, updatedToken);
 
-  logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
-  return {
-    statusCode: 202,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: "Request processed for revocation",
-      revokedAt: Math.floor(Date.now() / 1000),
-    }),
-  };
+    logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
+    return {
+      statusCode: 202,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "Request processed for revocation",
+        revokedAt: Math.floor(Date.now() / 1000),
+      }),
+    };
+  } catch (error) {
+    logger.error(LogMessage.REVOKE_LAMBDA_ERROR, { error });
+    return internalServerErrorResponse();
+  }
 }
 export function extractUriAndIndex(body: string | null): {
   uri: string;
@@ -112,7 +117,10 @@ function internalServerErrorResponse(): APIGatewayProxyResult {
   return {
     statusCode: 500,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: "Internal server error" }),
+    body: JSON.stringify({
+      error: "INTERNAL_SERVER_ERROR",
+      error_description: "Internal server error",
+    }),
   };
 }
 

@@ -176,6 +176,22 @@ Resources:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-access-logs
       RetentionInDays: 30
 
+  ApiGateway4xxResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref Api
+      ResponseType: DEFAULT_4XX
+      ResponseTemplates:
+        application/json: '{"error": "BAD_REQUEST", "error_description": "Request Error"}'
+
+  ApiGateway5xxResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref Api
+      ResponseType: DEFAULT_5XX
+      ResponseTemplates:
+        application/json: '{"error": "INTERNAL_SERVER_ERROR", "error_description": "Internal server error"}'
+
   ApiBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
