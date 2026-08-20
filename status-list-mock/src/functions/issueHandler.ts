@@ -30,25 +30,22 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
 
-  try {
-    const contentType = getHeaderValueFromHeaders(
-      event.headers,
-      "content-type",
-    );
-    if (contentType !== "application/jwt") {
-      logger.error(LogMessage.ISSUE_VALIDATION_FAILED, {
-        error: "Content-Type is not application/jwt",
-      });
-      return {
-        statusCode: 500,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: "INTERNAL_SERVER_ERROR",
-          error_description: "Internal server error",
-        }),
-      };
-    }
+  const contentType = getHeaderValueFromHeaders(event.headers, "content-type");
+  if (contentType !== "application/jwt") {
+    logger.error(LogMessage.ISSUE_VALIDATION_FAILED, {
+      error: "Content-Type is not application/jwt",
+    });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        error: "INTERNAL_SERVER_ERROR",
+        error_description: "Internal server error",
+      }),
+    };
+  }
 
+  try {
     const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
     const configuration = getRandomConfig();
