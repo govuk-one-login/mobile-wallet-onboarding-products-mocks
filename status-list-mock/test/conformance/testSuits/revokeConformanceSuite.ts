@@ -16,20 +16,23 @@ export interface SuiteConfig {
   upstream: string;
   beforeAllTimeout: number;
   setup: () => Promise<void>;
+  /** Base URL used in the JWT `uri` claim. Must match the service's SELF_URL.
+   *  Defaults to `upstream` when not provided (works for deployed environments). */
+  selfUrl?: string;
 }
 
 /**
  * Builds a minimal unsigned JWT for the revoke endpoint.
- * The `uri` claim uses the upstream hostname so it passes the SELF_URL validation.
+ * The `uri` claim uses the provided base URL so it passes the SELF_URL validation.
  */
-function buildRevokeJwt(upstream: string): string {
+function buildRevokeJwt(baseUrl: string): string {
   const header = { alg: "ES256", typ: "JWT" };
   const payload = {
     iss: "gov.uk",
     iat: 1756457120,
     exp: 1787993120,
     idx: 0,
-    uri: `${upstream}/t/36940190-e6af-42d0-9181-74c944dc4af7`,
+    uri: `${baseUrl}/t/36940190-e6af-42d0-9181-74c944dc4af7`,
   };
 
   const encode = (obj: object): string =>
@@ -77,7 +80,7 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
     });
 
     it("proxies a valid request and gets a valid response", async () => {
-      const revokeJwt = buildRevokeJwt(config.upstream);
+      const revokeJwt = buildRevokeJwt(config.selfUrl ?? config.upstream);
       const res = await postToRevoke(revokeJwt, "application/jwt");
 
       await expectStatus(res.clone(), 202);
