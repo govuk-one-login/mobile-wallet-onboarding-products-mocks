@@ -55,9 +55,9 @@ export function issueConformanceSuite(config: SuiteConfig): void {
 
     it("proxies a valid request and gets a valid response", async () => {
       const res = await postToIssue("a.valid.jwt", "application/jwt");
-      const body = await res.json();
 
-      await expectStatus(res, 200);
+      await expectStatus(res.clone(), 200);
+      const body = await res.json();
       expect(typeof body.idx).toBe("number");
       expect(body.idx).toBeGreaterThanOrEqual(0);
       expect(typeof body.uri).toBe("string");
