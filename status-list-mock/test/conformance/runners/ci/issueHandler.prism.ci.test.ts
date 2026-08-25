@@ -19,6 +19,7 @@ issueConformanceSuite({
     }).catch(() => null);
 
     if (!reachable) {
+      console.log(`Upstream at ${UPSTREAM_URL} is not reachable.`);
       throw new Error(
         `Upstream at ${UPSTREAM_URL} is not reachable. ` +
           "Check the service is deployed and UPSTREAM_URL is correct.",
