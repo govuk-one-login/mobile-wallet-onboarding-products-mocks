@@ -16,9 +16,8 @@ export interface SuiteConfig {
   upstream: string;
   beforeAllTimeout: number;
   setup: () => Promise<void>;
-  /** Base URL used in the JWT `uri` claim. Must match the service's SELF_URL.
-   *  Defaults to `upstream` when not provided (works for deployed environments). */
-  selfUrl?: string;
+  /** Base URL used in the JWT `uri` claim. Must match the service's SELF_URL. */
+  selfUrl: string;
 }
 
 /**
@@ -80,7 +79,7 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
     });
 
     it("proxies a valid request and gets a valid response", async () => {
-      const revokeJwt = buildRevokeJwt(config.selfUrl ?? config.upstream);
+      const revokeJwt = buildRevokeJwt(config.selfUrl);
       const res = await postToRevoke(revokeJwt, "application/jwt");
 
       await expectStatus(res.clone(), 202);
