@@ -5,7 +5,6 @@ const UPSTREAM_URL = process.env.UPSTREAM_URL;
 if (!UPSTREAM_URL)
   throw new Error("UPSTREAM_URL environment variable is not set.");
 
-
 issueConformanceSuite({
   upstream: UPSTREAM_URL,
   beforeAllTimeout: 30000,
