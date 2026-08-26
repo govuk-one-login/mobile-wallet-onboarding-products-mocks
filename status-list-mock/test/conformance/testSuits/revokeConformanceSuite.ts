@@ -12,15 +12,32 @@ const apiSpec = path.resolve(
   "openApiSpec/crs/crs-status-api.yaml",
 );
 
-// Minimal JWT required by the revoke handler. Signature is not verified.
-// Decoded payload: { iss, iat, exp, idx: 0, uri }
-const REVOKE_JWT =
-  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnb3YudWsiLCJpYXQiOjE3NTY0NTcxMjAsImV4cCI6MTc4Nzk5MzEyMCwiaWR4IjowLCJ1cmkiOiJodHRwczovL3Rlc3Qtc3RhdHVzLWxpc3QuY29tL3QvMzY5NDAxOTAtZTZhZi00MmQwLTkxODEtNzRjOTQ0ZGM0YWY3In0.test-signature";
-
 export interface SuiteConfig {
   upstream: string;
   beforeAllTimeout: number;
   setup: () => Promise<void>;
+  /** Base URL used in the JWT `uri` claim. Must match the service's SELF_URL. */
+  selfUrl: string;
+}
+
+/**
+ * Builds a minimal unsigned JWT for the revoke endpoint.
+ * The `uri` claim uses the provided base URL so it passes the SELF_URL validation.
+ */
+function buildRevokeJwt(baseUrl: string): string {
+  const header = { alg: "ES256", typ: "JWT" };
+  const payload = {
+    iss: "gov.uk",
+    iat: 1756457120,
+    exp: 1787993120,
+    idx: 0,
+    uri: `${baseUrl}/t/36940190-e6af-42d0-9181-74c944dc4af7`,
+  };
+
+  const encode = (obj: object): string =>
+    Buffer.from(JSON.stringify(obj)).toString("base64url");
+
+  return `${encode(header)}.${encode(payload)}.test-signature`;
 }
 
 async function postToRevoke(
@@ -62,10 +79,11 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
     });
 
     it("proxies a valid request and gets a valid response", async () => {
-      const res = await postToRevoke(REVOKE_JWT, "application/jwt");
-      const body = await res.json();
+      const revokeJwt = buildRevokeJwt(config.selfUrl);
+      const res = await postToRevoke(revokeJwt, "application/jwt");
 
-      await expectStatus(res, 202);
+      await expectStatus(res.clone(), 202);
+      const body = await res.json();
       expect(body.message).toBe("Request processed for revocation");
       expect(typeof body.revokedAt).toBe("number");
       expect(body.revokedAt).toBeGreaterThanOrEqual(0);

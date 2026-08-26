@@ -6,6 +6,7 @@ if (!UPSTREAM_URL)
 
 revokeConformanceSuite({
   upstream: UPSTREAM_URL,
+  selfUrl: UPSTREAM_URL,
   beforeAllTimeout: 30000,
   setup: async () => {
     // Fail fast if the deployed endpoint is not reachable.

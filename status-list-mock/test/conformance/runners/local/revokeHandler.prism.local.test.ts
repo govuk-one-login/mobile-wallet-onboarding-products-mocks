@@ -6,6 +6,7 @@ const SAM_HOST = "127.0.0.1";
 
 revokeConformanceSuite({
   upstream: `http://${SAM_HOST}:${SAM_PORT}`,
+  selfUrl: "https://test-status-list.com",
   beforeAllTimeout: 60000,
   setup: async () => {
     // Fail fast if the service is not running.
