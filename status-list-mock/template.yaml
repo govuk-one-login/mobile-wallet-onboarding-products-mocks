@@ -14,6 +14,7 @@ Parameters:
     AllowedValues:
       - dev
       - build
+      - staging
       - integration
     Default: dev
 
@@ -39,6 +40,10 @@ Mappings:
       LambdaLogLevel: INFO
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       SelfUrl: status-list-mock.wallet-onboarding.build.account.gov.uk
+    staging:
+      LambdaLogLevel: INFO
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      SelfUrl: status-list-mock.wallet-onboarding.staging.account.gov.uk
     integration:
       LambdaLogLevel: INFO
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
