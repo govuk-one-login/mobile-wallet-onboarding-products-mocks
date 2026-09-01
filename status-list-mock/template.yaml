@@ -168,6 +168,11 @@ Resources:
           Name: AWS::Include
           Parameters:
             Location: ./openApiSpec/mock/api-spec.yaml
+      Tags:
+        - Key: FMSRegionalPolicy
+          Value: false
+        - Key: CustomPolicy
+          Value: true
 
   ApiAccessLogs:
     Type: AWS::Logs::LogGroup
