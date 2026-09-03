@@ -55,6 +55,7 @@
     "uuid": "14.0.0",
     "@tootallnate/once": "3.0.1",
     "diff": "9.0.0",
-    "js-yaml": "5.2.2"
+    "js-yaml": "5.2.2",
+    "@faker-js/faker": "10.5.0"
   }
 }
