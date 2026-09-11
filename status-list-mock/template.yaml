@@ -24,7 +24,7 @@ Parameters:
     Type: String
     Default: none
 
-  VpcStackName:
+  LegacyVpcStackName:
     Description: |
       The stack name of the VPC where the Lambda functions will be deployed
     Type: String
@@ -275,14 +275,14 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+            Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
 
   IssueFunctionLambdaRole:
     Type: AWS::IAM::Role
@@ -405,14 +405,14 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+            Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
 
   RevokeFunctionLambdaRole:
     Type: AWS::IAM::Role
@@ -523,14 +523,14 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+            Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
 
   JwksFunctionLogGroup:
     Type: AWS::Logs::LogGroup
