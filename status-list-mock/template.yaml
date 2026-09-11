@@ -552,17 +552,28 @@ Resources:
       Role: !GetAtt JwksFunctionLambdaRole.Arn
       ReservedConcurrentExecutions: 5
       Tracing: Active
-      VpcConfig:
-        SecurityGroupIds:
-          - !ImportValue
-            Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
-        SubnetIds:
-          - !ImportValue
-            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
-          - !ImportValue
-            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
-          - !ImportValue
-            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
+      VpcConfig: !If
+        - MigrateToSpokeVpc
+        - SecurityGroupIds:
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
+          SubnetIds:
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdC
+        - SecurityGroupIds:
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
+          SubnetIds:
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
 
   JwksFunctionLogGroup:
     Type: AWS::Logs::LogGroup
