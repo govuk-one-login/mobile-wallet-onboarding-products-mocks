@@ -74,9 +74,16 @@ Conditions:
     - !Ref Environment
     - integration
 
-  MigrateToSpokeVpc: !Equals
-    - !Ref Environment
-    - dev
+  MigrateToSpokeVpc: !Or
+    - !Equals
+      - !Ref Environment
+      - dev
+    - !Equals
+      - !Ref Environment
+      - build
+    - !Equals
+      - !Ref Environment
+      - integration
 
 Transform: AWS::Serverless-2016-10-31
 
