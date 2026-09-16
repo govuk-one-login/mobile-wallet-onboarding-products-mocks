@@ -84,7 +84,14 @@ Conditions:
       - build
     - !Equals
       - !Ref Environment
+      - staging
+    - !Equals
+      - !Ref Environment
       - integration
+
+  MigrateTrafficToSpokeVpc: !Equals
+    - !Ref Environment
+    - dev
 
 Transform: AWS::Serverless-2016-10-31
 
@@ -391,6 +398,7 @@ Resources:
       Name: !Sub ${AWS::StackName}-${Environment}
       ProtocolType: HTTP
 
+  # LEGACY API INTEGRATION - soon to be depracated
   ApiGatewayHttpEndpointIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -406,7 +414,25 @@ Resources:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
       TlsConfig:
         ServerNameToVerify: !Ref CustomDomain
-    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditional are implemented (cfn-lint)
+    Condition: DeployLegacyVpcResources
+
+  # SPOKE API INTEGRATION
+  ApiGatewayHttpEndpointIntegrationSpoke:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId: !ImportValue
+        Fn::Sub: ${MigrationSpokeVpcStackName}-VpcLinkId
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref LoadBalancerListenerSpoke
+      PayloadFormatVersion: "1.0"
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref CustomDomain
+    Condition: DeploySpokeVpcResources
 
   ApiGatewayRouteToken:
     Type: AWS::ApiGatewayV2::Route
@@ -416,8 +442,10 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !Ref ApiGatewayHttpEndpointIntegration
-    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditional are implemented (cfn-lint)
+          - !If
+            - MigrateTrafficToSpokeVpc
+            - !Ref ApiGatewayHttpEndpointIntegrationSpoke
+            - !Ref ApiGatewayHttpEndpointIntegration
 
   ApiGatewayRouteHealthcheck:
     Type: AWS::ApiGatewayV2::Route
@@ -427,8 +455,10 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !Ref ApiGatewayHttpEndpointIntegration
-    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditional are implemented (cfn-lint)
+          - !If
+            - MigrateTrafficToSpokeVpc
+            - !Ref ApiGatewayHttpEndpointIntegrationSpoke
+            - !Ref ApiGatewayHttpEndpointIntegration
 
   ApiStageDefault:
     Type: AWS::ApiGatewayV2::Stage
