@@ -13,9 +13,14 @@ Parameters:
     Default: dev
 
   LegacyVpcStackName:
-    Description: The name of the stack that defines the VPC in which this container will run
+    Description: The name of the stack that defines the legacy VPC in which this container will run - soon to be depracted
     Type: String
     Default: vpc
+
+  MigrationSpokeVpcStackName:
+    Description: The name of the stack that defines the spoke VPC in which this container will migrated and deployed into.
+    Type: String
+    Default: spoke-vpc
 
   PermissionsBoundary:
     Description: The ARN of the permissions boundary to apply when creating IAM roles
