@@ -479,6 +479,39 @@ Resources:
               Fn::Sub: ${LegacyVpcStackName}-ProtectedSubnetIdC
       TaskDefinition: !Ref EcsServiceTaskDefinition
 
+  # SPOKE ECS
+  EcsServiceSpoke:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - LoadBalancerListenerSpoke
+    Properties:
+      Cluster: !Ref EcsCluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECSSpoke
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt EcsSecurityGroupSpoke.GroupId
+          Subnets:
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-ProtectedSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-ProtectedSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-ProtectedSubnetIdC
+      TaskDefinition: !Ref EcsServiceTaskDefinition
+
+  # *******************************
   EcsServiceTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
