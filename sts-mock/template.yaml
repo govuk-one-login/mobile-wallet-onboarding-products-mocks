@@ -12,7 +12,7 @@ Parameters:
       - integration
     Default: dev
 
-  VpcStackName:
+  LegacyVpcStackName:
     Description: The name of the stack that defines the VPC in which this container will run
     Type: String
     Default: vpc
@@ -72,7 +72,7 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcId
+        Fn::Sub: ${LegacyVpcStackName}-VpcId
 
   LoadBalancerSecurityGroupEgressToEcsSecurityGroup:
     Type: AWS::EC2::SecurityGroupEgress
@@ -93,7 +93,7 @@ Resources:
           Description: Allow all outbound traffic by default
           IpProtocol: "-1"
       VpcId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcId
+        Fn::Sub: ${LegacyVpcStackName}-VpcId
 
   EcsSecurityGroupIngressFromLoadBalancer:
     Type: AWS::EC2::SecurityGroupIngress
@@ -140,11 +140,11 @@ Resources:
         - !GetAtt LoadBalancerSecurityGroup.GroupId
       Subnets:
         - !ImportValue
-          Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
         - !ImportValue
-          Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
         - !ImportValue
-          Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+          Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -180,7 +180,7 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcId
+        Fn::Sub: ${LegacyVpcStackName}-VpcId
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
@@ -226,7 +226,7 @@ Resources:
       ApiId: !Ref ApiGatewayHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcLinkId
+        Fn::Sub: ${LegacyVpcStackName}-VpcLinkId
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref LoadBalancerListener
@@ -341,11 +341,11 @@ Resources:
             - !GetAtt EcsSecurityGroup.GroupId
           Subnets:
             - !ImportValue
-              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+              Fn::Sub: ${LegacyVpcStackName}-ProtectedSubnetIdA
             - !ImportValue
-              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+              Fn::Sub: ${LegacyVpcStackName}-ProtectedSubnetIdB
             - !ImportValue
-              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+              Fn::Sub: ${LegacyVpcStackName}-ProtectedSubnetIdC
       TaskDefinition: !Ref EcsServiceTaskDefinition
 
   EcsServiceTaskDefinition:
