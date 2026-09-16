@@ -406,7 +406,7 @@ Resources:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
       TlsConfig:
         ServerNameToVerify: !Ref CustomDomain
-    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditioanl are implemented (cfn-lint)
+    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditional are implemented (cfn-lint)
 
   ApiGatewayRouteToken:
     Type: AWS::ApiGatewayV2::Route
@@ -417,7 +417,7 @@ Resources:
         - /
         - - integrations
           - !Ref ApiGatewayHttpEndpointIntegration
-    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditioanl are implemented (cfn-lint)
+    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditional are implemented (cfn-lint)
 
   ApiGatewayRouteHealthcheck:
     Type: AWS::ApiGatewayV2::Route
@@ -428,7 +428,7 @@ Resources:
         - /
         - - integrations
           - !Ref ApiGatewayHttpEndpointIntegration
-    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditioanl are implemented (cfn-lint)
+    Condition: DeployLegacyVpcResources # has to be added at this stage, before migration conditional are implemented (cfn-lint)
 
   ApiStageDefault:
     Type: AWS::ApiGatewayV2::Stage
