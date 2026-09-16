@@ -65,7 +65,7 @@ Transform: AWS::Serverless-2016-10-31
 
 Resources:
 
-  # SECURITY GROUPS
+  # LEGACY SECURITY GROUPS - to be depracated
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -109,6 +109,51 @@ Resources:
       ToPort: !Ref ContainerPort
       GroupId: !GetAtt EcsSecurityGroup.GroupId
       SourceSecurityGroupId: !GetAtt LoadBalancerSecurityGroup.GroupId
+
+  # SPOKE SECURITY GROUPS
+  LoadBalancerSecurityGroupSpoke:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: STS mock load balancer security group - spoke vpc
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId: !ImportValue
+        Fn::Sub: ${MigrationSpokeVpcStackName}-VpcId
+
+  LoadBalancerSecurityGroupEgressToEcsSecurityGroupSpoke:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt LoadBalancerSecurityGroupSpoke.GroupId
+      IpProtocol: tcp
+      Description: Egress between the STS mock load balancer and the STS mock ECS security group - spoke-vpc
+      DestinationSecurityGroupId: !GetAtt EcsSecurityGroupSpoke.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+
+  EcsSecurityGroupSpoke:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: STS mock ECS security group - spoke-vpc
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      VpcId: !ImportValue
+        Fn::Sub: ${MigrationSpokeVpcStackName}-VpcId
+
+  EcsSecurityGroupIngressFromLoadBalancerSpoke:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      Description: STS mock ECS allows inbound from the STS mock load balancer - spoke-vpc
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt EcsSecurityGroupSpoke.GroupId
+      SourceSecurityGroupId: !GetAtt LoadBalancerSecurityGroupSpoke.GroupId
 
   # ACCESS LOGS
   ApiGatewayAccessLogsGroup:
