@@ -5,6 +5,9 @@ import groovy.json.JsonSlurper
 FIFTEEN_MONTHS_IN_SECONDS = 15 * 30 * 24 * 60 * 60
 SELF_URL = System.getenv('SELF_URL') ?: "http://localhost:9090"
 
+// Controls whether refresh tokens are issued for the pre-authorized_code flow.
+ISSUE_REFRESH_TOKENS = (System.getenv('ISSUE_REFRESH_TOKENS') ?: "true").equalsIgnoreCase("true")
+
 println "Raw token request body: ${context.request.body}"
 
 try {
@@ -52,10 +55,12 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     def responseBody = [access_token: accessToken, token_type: "bearer", expires_in: 180]
 
     def dpopHeader = context.request.headers['DPoP']
-    if (payload.credential_configuration_ids && dpopHeader) {
+    if (payload.credential_configuration_ids && dpopHeader && ISSUE_REFRESH_TOKENS) {
         responseBody.refresh_token = buildRefreshToken(payload)
         responseBody.refresh_token_timeout = FIFTEEN_MONTHS_IN_SECONDS
         println "Built refresh token successfully,"
+    } else if (payload.credential_configuration_ids && dpopHeader && !ISSUE_REFRESH_TOKENS) {
+        println "Refresh token issuance disabled for this environment, skipping refresh token,"
     }
 
     println "Returning 200 with token(s) successfully,"
@@ -71,6 +76,12 @@ if (grantType == 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
 
 } else if (grantType == 'refresh_token') {
     println "refresh_token flow, building new access & refresh token"
+
+    if (!ISSUE_REFRESH_TOKENS) {
+        println "Refresh token issuance disabled for this environment, rejecting refresh_token grant with unsupported_grant_type"
+        respond().withStatusCode(400).withExampleName('errorUnsupportedGrantType')
+        return
+    }
 
     def refreshTokenBody = params['refresh_token']
     def payload = parseJwtPayload(refreshTokenBody)
