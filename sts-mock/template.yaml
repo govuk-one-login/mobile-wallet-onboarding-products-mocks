@@ -33,14 +33,17 @@ Mappings:
       CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.dev.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.dev.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:219494607463:repository/sts-mock-image-repo-containerrepository-ctjqse5shnuf
+      IssueRefreshTokens: "false"
     build:
       CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.build.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.build.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:899032468188:repository/sts-mock-image-repo-containerrepository-c47qvuediwmo
+      IssueRefreshTokens: "true"
     integration:
       CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.integration.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.integration.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:899032468188:repository/sts-mock-image-repo-containerrepository-c47qvuediwmo
+      IssueRefreshTokens: "false"
 
 Conditions:
   UsePermissionsBoundary: !Not
@@ -382,6 +385,11 @@ Resources:
                     - EnvironmentVariables
                     - !Ref Environment
                     - CredentialIssuerUrl
+            - Name: ISSUE_REFRESH_TOKENS
+              Value: !FindInMap
+                - EnvironmentVariables
+                - !Ref Environment
+                - IssueRefreshTokens
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
