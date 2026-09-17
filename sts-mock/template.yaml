@@ -33,7 +33,7 @@ Mappings:
       CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.dev.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.dev.account.gov.uk
       StsMockImageRepositoryArn: arn:aws:ecr:eu-west-2:219494607463:repository/sts-mock-image-repo-containerrepository-ctjqse5shnuf
-      IssueRefreshTokens: "false"
+      IssueRefreshTokens: "true"
     build:
       CredentialIssuerUrl: example-credential-issuer.wallet-onboarding.build.account.gov.uk
       SelfUrl: sts-mock.wallet-onboarding.build.account.gov.uk
