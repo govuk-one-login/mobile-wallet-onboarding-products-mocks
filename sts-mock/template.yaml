@@ -70,9 +70,6 @@ Conditions:
       - build
     - !Equals
       - !Ref Environment
-      - staging
-    - !Equals
-      - !Ref Environment
       - integration
 
   DeploySpokeVpcResources: !Or
@@ -84,9 +81,6 @@ Conditions:
       - build
     - !Equals
       - !Ref Environment
-      - staging
-    - !Equals
-      - !Ref Environment
       - integration
 
   MigrateTrafficToSpokeVpc: !Or
@@ -96,9 +90,6 @@ Conditions:
     - !Equals
       - !Ref Environment
       - build
-    - !Equals
-      - !Ref Environment
-      - staging
     - !Equals
       - !Ref Environment
       - integration
