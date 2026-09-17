@@ -83,6 +83,9 @@ Conditions:
       - build
     - !Equals
       - !Ref Environment
+      - staging
+    - !Equals
+      - !Ref Environment
       - integration
 
 Transform: AWS::Serverless-2016-10-31
