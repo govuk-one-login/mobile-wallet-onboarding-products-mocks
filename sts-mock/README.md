@@ -60,5 +60,3 @@ The `sts-mock-check-oas-for-drift` workflow ensures the OpenAPI spec in this rep
 It clones `sts-back` and uses [oasdiff](https://github.com/oasdiff/oasdiff) to compare the specs. If differences are found, the workflow fails and a notification is sent to the OP Slack channel.
 
 When this happens, update `sts.yaml` to reflect the upstream changes.
-
-test
