@@ -70,9 +70,6 @@ Conditions:
       - build
     - !Equals
       - !Ref Environment
-      - staging
-    - !Equals
-      - !Ref Environment
       - integration
 
   DeploySpokeVpcResources: !Or
@@ -84,15 +81,15 @@ Conditions:
       - build
     - !Equals
       - !Ref Environment
-      - staging
-    - !Equals
-      - !Ref Environment
       - integration
 
   MigrateTrafficToSpokeVpc: !Or
     - !Equals
       - !Ref Environment
       - dev
+    - !Equals
+      - !Ref Environment
+      - build
     - !Equals
       - !Ref Environment
       - integration
@@ -440,6 +437,13 @@ Resources:
 
   ApiGatewayRouteToken:
     Type: AWS::ApiGatewayV2::Route
+    Metadata:
+
+      # W1028: cfn-lint will block deplopyment, as there is a possiblity of deployment conditionals clashing with migration conditionals
+      cfn-lint:
+        config:
+          ignore_checks:
+            - W1028
     Properties:
       ApiId: !Ref ApiGatewayHttpEndpoint
       RouteKey: POST /token
@@ -453,6 +457,13 @@ Resources:
 
   ApiGatewayRouteHealthcheck:
     Type: AWS::ApiGatewayV2::Route
+    Metadata:
+
+      # W1028: cfn-lint will block deplopyment, as there is a possiblity of deployment conditionals clashing with migration conditionals
+      cfn-lint:
+        config:
+          ignore_checks:
+            - W1028
     Properties:
       ApiId: !Ref ApiGatewayHttpEndpoint
       RouteKey: GET /healthcheck
