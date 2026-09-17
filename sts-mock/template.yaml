@@ -12,10 +12,15 @@ Parameters:
       - integration
     Default: dev
 
-  VpcStackName:
-    Description: The name of the stack that defines the VPC in which this container will run
+  LegacyVpcStackName:
+    Description: The name of the stack that defines the legacy VPC in which this container will run - soon to be depracted
     Type: String
     Default: vpc
+
+  MigrationSpokeVpcStackName:
+    Description: The name of the stack that defines the spoke VPC in which this container will migrated and deployed into.
+    Type: String
+    Default: spoke-vpc
 
   PermissionsBoundary:
     Description: The ARN of the permissions boundary to apply when creating IAM roles
@@ -56,11 +61,47 @@ Conditions:
     - !Ref Environment
     - integration
 
+  DeployLegacyVpcResources: !Or
+    - !Equals
+      - !Ref Environment
+      - dev
+    - !Equals
+      - !Ref Environment
+      - build
+    - !Equals
+      - !Ref Environment
+      - staging
+    - !Equals
+      - !Ref Environment
+      - integration
+
+  DeploySpokeVpcResources: !Or
+    - !Equals
+      - !Ref Environment
+      - dev
+    - !Equals
+      - !Ref Environment
+      - build
+    - !Equals
+      - !Ref Environment
+      - staging
+    - !Equals
+      - !Ref Environment
+      - integration
+
+  MigrateTrafficToSpokeVpc: !Or
+    - !Equals
+      - !Ref Environment
+      - dev
+    - !Equals
+      - !Ref Environment
+      - integration
+
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
 
-  # SECURITY GROUPS
+  # LEGACY SECURITY GROUPS - to be depracated
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -72,7 +113,8 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcId
+        Fn::Sub: ${LegacyVpcStackName}-VpcId
+    Condition: DeployLegacyVpcResources
 
   LoadBalancerSecurityGroupEgressToEcsSecurityGroup:
     Type: AWS::EC2::SecurityGroupEgress
@@ -83,6 +125,7 @@ Resources:
       DestinationSecurityGroupId: !GetAtt EcsSecurityGroup.GroupId
       FromPort: !Ref ContainerPort
       ToPort: !Ref ContainerPort
+    Condition: DeployLegacyVpcResources
 
   EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -93,7 +136,8 @@ Resources:
           Description: Allow all outbound traffic by default
           IpProtocol: "-1"
       VpcId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcId
+        Fn::Sub: ${LegacyVpcStackName}-VpcId
+    Condition: DeployLegacyVpcResources
 
   EcsSecurityGroupIngressFromLoadBalancer:
     Type: AWS::EC2::SecurityGroupIngress
@@ -104,7 +148,58 @@ Resources:
       ToPort: !Ref ContainerPort
       GroupId: !GetAtt EcsSecurityGroup.GroupId
       SourceSecurityGroupId: !GetAtt LoadBalancerSecurityGroup.GroupId
+    Condition: DeployLegacyVpcResources
 
+  # SPOKE SECURITY GROUPS
+  LoadBalancerSecurityGroupSpoke:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: STS mock load balancer security group - spoke vpc
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId: !ImportValue
+        Fn::Sub: ${MigrationSpokeVpcStackName}-VpcId
+    Condition: DeploySpokeVpcResources
+
+  LoadBalancerSecurityGroupEgressToEcsSecurityGroupSpoke:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt LoadBalancerSecurityGroupSpoke.GroupId
+      IpProtocol: tcp
+      Description: Egress between the STS mock load balancer and the STS mock ECS security group - spoke-vpc
+      DestinationSecurityGroupId: !GetAtt EcsSecurityGroupSpoke.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+    Condition: DeploySpokeVpcResources
+
+  EcsSecurityGroupSpoke:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: STS mock ECS security group - spoke-vpc
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      VpcId: !ImportValue
+        Fn::Sub: ${MigrationSpokeVpcStackName}-VpcId
+    Condition: DeploySpokeVpcResources
+
+  EcsSecurityGroupIngressFromLoadBalancerSpoke:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      Description: STS mock ECS allows inbound from the STS mock load balancer - spoke-vpc
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt EcsSecurityGroupSpoke.GroupId
+      SourceSecurityGroupId: !GetAtt LoadBalancerSecurityGroupSpoke.GroupId
+    Condition: DeploySpokeVpcResources
+
+  # ************************************
   # ACCESS LOGS
   ApiGatewayAccessLogsGroup:
     Type: AWS::Logs::LogGroup
@@ -130,9 +225,8 @@ Resources:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-ecs
       RetentionInDays: 14
 
+  # LEGACY LOAD BALANCER - to be depratcated
   LoadBalancer:
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Scheme: internal
@@ -140,11 +234,11 @@ Resources:
         - !GetAtt LoadBalancerSecurityGroup.GroupId
       Subnets:
         - !ImportValue
-          Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
         - !ImportValue
-          Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
         - !ImportValue
-          Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+          Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -155,8 +249,6 @@ Resources:
           Value: !Sub sts-mock-${Environment}
         - Key: idle_timeout.timeout_seconds
           Value: 60
-        - Key: deletion_protection.enabled
-          Value: true
         - Key: routing.http.drop_invalid_header_fields.enabled
           Value: true
       Tags:
@@ -164,6 +256,7 @@ Resources:
           Value: false
         - Key: CustomPolicy
           Value: true
+    Condition: DeployLegacyVpcResources
 
   LoadBalancerListenerTargetGroupECS:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -180,10 +273,11 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcId
+        Fn::Sub: ${LegacyVpcStackName}-VpcId
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
+    Condition: DeployLegacyVpcResources
 
   LoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -197,6 +291,7 @@ Resources:
       Certificates:
         - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
       SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    Condition: DeployLegacyVpcResources
 
   LoadBalancerListenerBlockSystemRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
@@ -213,20 +308,108 @@ Resources:
             StatusCode: "404"
             ContentType: text/plain
             MessageBody: Not Found
+    Condition: DeployLegacyVpcResources
 
+  # SPOKE LOAD BALANCER
+  LoadBalancerSpoke:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt LoadBalancerSecurityGroupSpoke.GroupId
+      Subnets:
+        - !ImportValue
+          Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdA
+        - !ImportValue
+          Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdB
+        - !ImportValue
+          Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdC
+      Type: application
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: true
+        - Key: access_logs.s3.bucket
+          Value: !Sub di-lb-access-logs-${AWS::AccountId}-${AWS::Region}
+        - Key: access_logs.s3.prefix
+          Value: !Sub sts-mock-spoke-${Environment}
+        - Key: idle_timeout.timeout_seconds
+          Value: 60
+        - Key: routing.http.drop_invalid_header_fields.enabled
+          Value: true
+      Tags:
+        - Key: FMSRegionalPolicy
+          Value: false
+        - Key: CustomPolicy
+          Value: true
+    Condition: DeploySpokeVpcResources
+
+  LoadBalancerListenerTargetGroupECSSpoke:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: TRUE
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /healthcheck
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 60
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-499
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !ImportValue
+        Fn::Sub: ${MigrationSpokeVpcStackName}-VpcId
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+    Condition: DeploySpokeVpcResources
+
+  LoadBalancerListenerSpoke:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECSSpoke
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancerSpoke
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    Condition: DeploySpokeVpcResources
+
+  LoadBalancerListenerBlockSystemRuleSpoke:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref LoadBalancerListenerSpoke
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /system/*
+      Actions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: "404"
+            ContentType: text/plain
+            MessageBody: Not Found
+    Condition: DeploySpokeVpcResources
+
+  # ************************************
   ApiGatewayHttpEndpoint:
     Type: AWS::ApiGatewayV2::Api
     Properties:
       Name: !Sub ${AWS::StackName}-${Environment}
       ProtocolType: HTTP
 
+  # LEGACY API INTEGRATION - soon to be depracated
   ApiGatewayHttpEndpointIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref ApiGatewayHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId: !ImportValue
-        Fn::Sub: ${VpcStackName}-VpcLinkId
+        Fn::Sub: ${LegacyVpcStackName}-VpcLinkId
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref LoadBalancerListener
@@ -235,6 +418,25 @@ Resources:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
       TlsConfig:
         ServerNameToVerify: !Ref CustomDomain
+    Condition: DeployLegacyVpcResources
+
+  # SPOKE API INTEGRATION
+  ApiGatewayHttpEndpointIntegrationSpoke:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGatewayHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId: !ImportValue
+        Fn::Sub: ${MigrationSpokeVpcStackName}-VpcLinkId
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref LoadBalancerListenerSpoke
+      PayloadFormatVersion: "1.0"
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref CustomDomain
+    Condition: DeploySpokeVpcResources
 
   ApiGatewayRouteToken:
     Type: AWS::ApiGatewayV2::Route
@@ -244,7 +446,10 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !Ref ApiGatewayHttpEndpointIntegration
+          - !If
+            - MigrateTrafficToSpokeVpc
+            - !Ref ApiGatewayHttpEndpointIntegrationSpoke
+            - !Ref ApiGatewayHttpEndpointIntegration
 
   ApiGatewayRouteHealthcheck:
     Type: AWS::ApiGatewayV2::Route
@@ -254,7 +459,10 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !Ref ApiGatewayHttpEndpointIntegration
+          - !If
+            - MigrateTrafficToSpokeVpc
+            - !Ref ApiGatewayHttpEndpointIntegrationSpoke
+            - !Ref ApiGatewayHttpEndpointIntegration
 
   ApiStageDefault:
     Type: AWS::ApiGatewayV2::Stage
@@ -317,6 +525,7 @@ Resources:
         - Name: containerInsights
           Value: enabled
 
+  # LEGACY ECS - soon to be depracated
   EcsService:
     Type: AWS::ECS::Service
     DependsOn:
@@ -341,13 +550,48 @@ Resources:
             - !GetAtt EcsSecurityGroup.GroupId
           Subnets:
             - !ImportValue
-              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+              Fn::Sub: ${LegacyVpcStackName}-ProtectedSubnetIdA
             - !ImportValue
-              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+              Fn::Sub: ${LegacyVpcStackName}-ProtectedSubnetIdB
             - !ImportValue
-              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+              Fn::Sub: ${LegacyVpcStackName}-ProtectedSubnetIdC
       TaskDefinition: !Ref EcsServiceTaskDefinition
+    Condition: DeployLegacyVpcResources
 
+  # SPOKE ECS
+  EcsServiceSpoke:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - LoadBalancerListenerSpoke
+    Properties:
+      Cluster: !Ref EcsCluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECSSpoke
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt EcsSecurityGroupSpoke.GroupId
+          Subnets:
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-ProtectedSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-ProtectedSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-ProtectedSubnetIdC
+      TaskDefinition: !Ref EcsServiceTaskDefinition
+    Condition: DeploySpokeVpcResources
+
+  # *******************************
   EcsServiceTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
