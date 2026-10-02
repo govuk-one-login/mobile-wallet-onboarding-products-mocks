@@ -523,14 +523,14 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
-            Fn::Sub: ${MigrationSpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
           - !ImportValue
-            Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdA
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
           - !ImportValue
-            Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdB
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
           - !ImportValue
-            Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdC
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
 
   JwksFunctionLogGroup:
     Type: AWS::Logs::LogGroup
