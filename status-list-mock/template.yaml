@@ -24,12 +24,6 @@ Parameters:
     Type: String
     Default: none
 
-  LegacyVpcStackName:
-    Description: |
-      The stack name of the VPC where the Lambda functions will be deployed
-    Type: String
-    Default: vpc
-
   MigrationSpokeVpcStackName:
     Description: |
       The stack name of the VPC where the Lambda functions will be deployed
