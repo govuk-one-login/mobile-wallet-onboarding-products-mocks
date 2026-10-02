@@ -24,7 +24,7 @@ Parameters:
     Type: String
     Default: none
 
-  MigrationSpokeVpcStackName:
+  VpcStackName:
     Description: |
       The stack name of the VPC where the Lambda functions will be deployed
     Type: String
