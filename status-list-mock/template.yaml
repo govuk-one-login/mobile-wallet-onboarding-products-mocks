@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Status List Mock
+Description: Status List Mock test
 
 Parameters:
   CodeSigningConfigArn:
