@@ -6,7 +6,7 @@ This is a mock implementation of the Status List service used by GOV.UK Wallet t
 
 ## Tech stack
 
-This service is built with TypeScript and Node.js, deployed as AWS Lambda functions behind an API Gateway. It uses S3 for storage and KMS for signing, with infrastructure managed via AWS SAM.
+This service is built with TypeScript and Node.js, deployed as AWS Lambda functions behind an API Gateway. It uses S3 for storage and KMS for signing with infrastructure managed via AWS SAM.
 
 ## Prerequisites
 
