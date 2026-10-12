@@ -265,7 +265,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-issue
       Handler: src/functions/issueHandler.handler
       Role: !GetAtt IssueFunctionLambdaRole.Arn
-      ReservedConcurrentExecutions: 300
+      ReservedConcurrentExecutions: 100
       Tracing: Active
       VpcConfig:
         SecurityGroupIds:
@@ -385,7 +385,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-revoke
       Handler: src/functions/revokeHandler.handler
       Role: !GetAtt RevokeFunctionLambdaRole.Arn
-      ReservedConcurrentExecutions: 300
+      ReservedConcurrentExecutions: 100
       Tracing: Active
       Environment:
         Variables:
@@ -513,7 +513,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
-      ReservedConcurrentExecutions: 300
+      ReservedConcurrentExecutions: 100
       Tracing: Active
       VpcConfig:
         SecurityGroupIds:
