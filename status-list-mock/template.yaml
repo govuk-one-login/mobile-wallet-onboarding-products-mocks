@@ -777,7 +777,7 @@ Resources:
       Dimensions:
         - Name: CanaryName
           Value: status_list_mock_heartbeat
-      Period: 60 # 1 minute in seconds
+      Period: 60 # 1 minute in secs
       EvaluationPeriods: 1
       Statistic: Sum
       ComparisonOperator: LessThanThreshold
