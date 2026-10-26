@@ -48,7 +48,7 @@ jobs:
         run: yq eval 'explode(.)' ${{ env.LOCAL_OAS_PATH }} > sts-mock-normalised.yaml
 
       - name: Check OAS for drift
-        uses: oasdiff/oasdiff-action/diff@b9325c9e0a27ab65b0da3b766522cedec6be81dc # v0.1.18
+        uses: oasdiff/oasdiff-action/diff@514e22ec2f1d1654fb78ac3bb7dc00d8f3c6c4d9 # v0.1.19
         with:
           base: sts-backend-normalised.yaml
           revision: sts-mock-normalised.yaml
