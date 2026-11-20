@@ -8,6 +8,20 @@ Code repository for mocks maintained by Wallet Onboarding Products. This project
 * [`txma-mock`](./txma-mock/) - A mock of the Mobile Platform `POST /txma-event` endpoint, built using API Gateway's mock integration.
 * [`status-list-mock`](./status-list-mock/) - A mock implementation of the Status List service used by GOV.UK Wallet to check the current status of its stored credentials.
 
+## GitHub Actions workflows
+
+The pre-merge, post-merge and dev deploy workflows cover all three mocks and are built from reusable modules (`_reusable-*.yml`) in `.github/workflows`:
+
+* `pull-request-checks.yml` - pre-merge checks.
+* `push-to-main.yml` - post-merge checks and upload to the build environment.
+* `dev-deploy.yml` - manual deploy to dev (choose a service or `all`, plus a git ref).
+
+Each workflow starts with a `detect-services` job, which selects the services to act on from the changed files (or the `service` input on manual runs). Per-service settings (directory, secret prefix, SAM version, whether it has a Node.js project or container image, and so on) live in `.github/config/services.json`. Secrets are resolved by name as `<ENVIRONMENT>_<SECRET-PREFIX>_<SUFFIX>`, for example `BUILD_STS_MOCK_GH_ACTIONS_ROLE_ARN`.
+
+`check-oas-for-drift.yml` is a separate workflow that compares the OpenAPI specs of `sts-mock` and `status-list-mock` with their upstream services. It runs daily, and on pull requests that change those mocks. A service is included if it has an `oas-drift` block in `services.json`.
+
+To add a new mock, add an entry to `services.json`, add its path to the `paths` filters and the `service` choice options in the three workflows, and create the matching secrets.
+
 ## Contributing
 
 This project uses [pre-commit](https://pre-commit.com/) to enforce code quality and validate commit messages against [Conventional Commits](https://github.com/conventional-changelog/commitlint) standards across all projects in this repository. Non-conforming messages will be rejected.

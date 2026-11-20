@@ -1,0 +1,58 @@
+name: Deploy to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to deploy
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - sts-mock
+          - status-list-mock
+          - txma-mock
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  detect-services:
+    name: Detect services
+    uses: ./.github/workflows/_reusable-detect-services.yml
+    with:
+      selected-service: ${{ inputs.service }}
+
+  deploy:
+    name: Deploy (${{ matrix.service.name }})
+    needs: [detect-services]
+    if: needs.detect-services.outputs.services != '[]'
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-services.outputs.services) }}
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: ${{ matrix.service.name }}
+      working-directory: ${{ matrix.service.directory }}
+      secret-prefix: ${{ matrix.service.secret-prefix }}
+      environment: DEV
+      git-ref: ${{ inputs.gitRef }}
+      sam-version: ${{ matrix.service.sam-version }}
+      sam-build-args: ${{ matrix.service.sam-build-args }}
+      node: ${{ matrix.service.node }}
+      container: ${{ matrix.service.container }}
+      sign-container: false
+      sign-sam-artifact: ${{ matrix.service.sign-sam-artifact-dev }}
+      upload-method: ${{ matrix.service.dev-upload-method }}
+      timeout-minutes: ${{ matrix.service.deploy-timeout-minutes }}
+    secrets: inherit

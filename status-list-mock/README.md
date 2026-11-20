@@ -97,13 +97,13 @@ This mock implements the same API contract as the real CRS service. To ensure th
 does not drift from the real service, copies of the CRS specs are kept here and used in
 two ways:
 
-1. **Drift detection** — the private spec is checked against the upstream source daily and on every PR
+1. **Drift detection** — the private spec is checked against the upstream source daily and on PRs that change this mock
 2. **Conformance testing** — both specs are used by Prism to enforce the OAS contract against the running service.
 
 For more information see [test/conformance/README.md](test/conformance/README.md)
 
 
-The `status-list-mock-check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff)
+The shared `check-oas-for-drift` workflow (which also covers `sts-mock`) clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff)
 to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a
 notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating
 `openApiSpec/crs/crs-private-spec.yaml` to reflect the upstream changes.

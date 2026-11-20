@@ -1,0 +1,59 @@
+[
+  {
+    "name": "sts-mock",
+    "directory": "sts-mock",
+    "secret-prefix": "STS_MOCK",
+    "sam-version": "1.155.2",
+    "sam-build-args": "",
+    "node": false,
+    "container": true,
+    "sign-sam-artifact-build": false,
+    "sign-sam-artifact-dev": false,
+    "deploy-timeout-minutes": 15,
+    "dev-upload-method": "aws-cli",
+    "oas-drift": {
+      "display-name": "STS Back",
+      "upstream-repository": "govuk-one-login/sts-back",
+      "upstream-checkout-path": "sts-back",
+      "upstream-oas-path": "backend-api/openapi/sts-backend.yaml",
+      "local-oas-path": "sts-mock/sts.yaml",
+      "deploy-key-secret": "WALLET_STS_BACK_DEPLOY_KEY",
+      "normalise": true
+    }
+  },
+  {
+    "name": "status-list-mock",
+    "directory": "status-list-mock",
+    "secret-prefix": "STATUS_LIST_MOCK",
+    "sam-version": "1.132.0",
+    "sam-build-args": "--parallel",
+    "node": true,
+    "container": false,
+    "sign-sam-artifact-build": true,
+    "sign-sam-artifact-dev": true,
+    "deploy-timeout-minutes": 15,
+    "dev-upload-method": "devplatform-action",
+    "oas-drift": {
+      "display-name": "Status List",
+      "upstream-repository": "govuk-one-login/crs-backend",
+      "upstream-checkout-path": "status-list-mock/crs-backend",
+      "upstream-oas-path": "backend/openApiSpecs/crs-status-api.yaml",
+      "local-oas-path": "status-list-mock/openApiSpec/crs/crs-status-api.yaml",
+      "deploy-key-secret": "WALLET_CRS_DEPLOY_KEY",
+      "normalise": false
+    }
+  },
+  {
+    "name": "txma-mock",
+    "directory": "txma-mock",
+    "secret-prefix": "TXMA_MOCK",
+    "sam-version": "1.155.2",
+    "sam-build-args": "",
+    "node": false,
+    "container": false,
+    "sign-sam-artifact-build": true,
+    "sign-sam-artifact-dev": false,
+    "deploy-timeout-minutes": 30,
+    "dev-upload-method": "devplatform-action"
+  }
+]

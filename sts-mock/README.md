@@ -55,7 +55,7 @@ Automated deployments to `build` are triggered on push to `main` after PR approv
 
 ### OpenAPI spec sync
 
-The `sts-mock-check-oas-for-drift` workflow ensures the OpenAPI spec in this repo stays in sync with `sts-back`.
+The shared `check-oas-for-drift` workflow (which also covers `status-list-mock`) ensures the STS mock's OpenAPI spec in this repo stays in sync with `sts-back`. It runs daily, and on pull requests that change this mock.
 
 It clones `sts-back` and uses [oasdiff](https://github.com/oasdiff/oasdiff) to compare the specs. If differences are found, the workflow fails and a notification is sent to the OP Slack channel.
 
