@@ -18,6 +18,8 @@ The pre-merge, post-merge and dev deploy workflows cover all three mocks and are
 
 Each workflow starts with a `detect-services` job, which selects the services to act on from the changed files (or the `service` input on manual runs). Per-service settings (directory, secret prefix, SAM version, whether it has a Node.js project or container image, and so on) live in `.github/config/services.json`. Secrets are resolved by name as `<ENVIRONMENT>_<SECRET-PREFIX>_<SUFFIX>`, for example `BUILD_STS_MOCK_GH_ACTIONS_ROLE_ARN`.
 
+`check-oas-for-drift.yml` is a separate workflow that compares the OpenAPI specs of `sts-mock` and `status-list-mock` with their upstream services. It runs daily, and on pull requests that change those mocks. A service is included if it has an `oas-drift` block in `services.json`.
+
 To add a new mock, add an entry to `services.json`, add its path to the `paths` filters and the `service` choice options in the three workflows, and create the matching secrets.
 
 ## Contributing
