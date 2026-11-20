@@ -1,0 +1,105 @@
+name: Check OAS for Drift
+
+# Compares each mock's OpenAPI spec with the upstream service's spec and fails on any difference.
+# Services with an "oas-drift" block in .github/config/services.json are checked:
+#  - schedule:          all of them
+#  - workflow_dispatch: the selected service, or all of them
+#  - workflow_call:     those with changed files (see _reusable-detect-services.yml)
+
+on:
+  schedule:
+    # runs at midnight every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to check
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - sts-mock
+          - status-list-mock
+  workflow_call:
+    secrets:
+      WALLET_STS_BACK_DEPLOY_KEY:
+        required: false
+      WALLET_CRS_DEPLOY_KEY:
+        required: false
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL:
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-oas-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  detect-services:
+    name: Detect services
+    uses: ./.github/workflows/_reusable-detect-services.yml
+    with:
+      selected-service: ${{ inputs.service || 'all' }}
+
+  check-oas-for-drift:
+    name: Check ${{ matrix.service.oas-drift.display-name }} OAS for Drift
+    needs: [detect-services]
+    if: needs.detect-services.outputs.oas-drift-services != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-services.outputs.oas-drift-services) }}
+    env:
+      UPSTREAM_CHECKOUT_PATH: ${{ matrix.service.oas-drift.upstream-checkout-path }}
+      UPSTREAM_OAS_PATH: ${{ matrix.service.oas-drift.upstream-oas-path }}
+      LOCAL_OAS_PATH: ${{ matrix.service.oas-drift.local-oas-path }}
+    steps:
+      - name: Check out OP Mocks repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check out upstream repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ matrix.service.oas-drift.upstream-repository }}
+          path: ${{ matrix.service.oas-drift.upstream-checkout-path }}
+          ref: 'main'
+          ssh-key: ${{ secrets[matrix.service.oas-drift.deploy-key-secret] }}
+
+      - name: Set spec paths
+        id: specs
+        env:
+          NORMALISE: ${{ matrix.service.oas-drift.normalise }}
+        run: |
+          if [[ "$NORMALISE" == "true" ]]; then
+            # oasdiff cannot parse YAML files with duplicate merge keys (<<)
+            # explode(.) resolves all anchors, aliases and merge keys inline
+            yq eval 'explode(.)' "$UPSTREAM_CHECKOUT_PATH/$UPSTREAM_OAS_PATH" > upstream-normalised.yaml
+            yq eval 'explode(.)' "$LOCAL_OAS_PATH" > local-normalised.yaml
+            echo "base=upstream-normalised.yaml" >> "$GITHUB_OUTPUT"
+            echo "revision=local-normalised.yaml" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=$UPSTREAM_CHECKOUT_PATH/$UPSTREAM_OAS_PATH" >> "$GITHUB_OUTPUT"
+            echo "revision=$LOCAL_OAS_PATH" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check OAS for drift
+        uses: oasdiff/oasdiff-action/diff@8a211b41745fcecdfa4a86531ffbf08934fb14f6 # v0.1.23
+        with:
+          base: ${{ steps.specs.outputs.base }}
+          revision: ${{ steps.specs.outputs.revision }}
+          fail-on-diff: true
+
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    needs: [check-oas-for-drift]
+    if: failure()
+    uses: ./.github/workflows/_reusable-notify-slack-on-failure.yml
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
