@@ -1,0 +1,108 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+    paths:
+      - sts-mock/**
+      - status-list-mock/**
+      - txma-mock/**
+      - .github/workflows/pull-request-checks.yml
+      - .github/workflows/check-oas-for-drift.yml
+      - .github/workflows/_reusable-*.yml
+      - .github/config/services.json
+      - .github/scripts/detect-services.sh
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  detect-services:
+    name: Detect services
+    uses: ./.github/workflows/_reusable-detect-services.yml
+
+  check-sam-template-formatting:
+    name: Check SAM template formatting (${{ matrix.service.name }})
+    needs: [detect-services]
+    if: needs.detect-services.outputs.services != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-services.outputs.services) }}
+    uses: ./.github/workflows/_reusable-sam-format-check.yml
+    with:
+      working-directory: ./${{ matrix.service.directory }}
+
+  validate-docker-image:
+    name: Validate Docker image (${{ matrix.service.name }})
+    needs: [detect-services]
+    if: needs.detect-services.outputs.container-services != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-services.outputs.container-services) }}
+    uses: ./.github/workflows/_reusable-docker-validate.yml
+    with:
+      working-directory: ./${{ matrix.service.directory }}
+
+  node-ci:
+    name: Node.js CI (${{ matrix.service.name }})
+    needs: [detect-services]
+    if: needs.detect-services.outputs.node-services != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-services.outputs.node-services) }}
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: ${{ matrix.service.directory }}
+      run-lint: true
+      run-sonar: ${{ github.actor != 'dependabot[bot]' }}
+      quality-gate-timeout-minutes: 5
+    secrets: inherit
+
+  validate-and-build-sam-template:
+    name: Validate and build SAM template (${{ matrix.service.name }})
+    needs: [detect-services]
+    if: needs.detect-services.outputs.services != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-services.outputs.services) }}
+    uses: ./.github/workflows/_reusable-sam-validate.yml
+    with:
+      working-directory: ./${{ matrix.service.directory }}
+      sam-version: ${{ matrix.service.sam-version }}
+      sam-build-args: ${{ matrix.service.sam-build-args }}
+
+  run-checkov:
+    name: Run Checkov (${{ matrix.service.name }})
+    needs: [detect-services]
+    if: needs.detect-services.outputs.services != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-services.outputs.services) }}
+    uses: ./.github/workflows/_reusable-checkov.yml
+    with:
+      file-to-scan: ${{ matrix.service.directory }}/template.yaml
+
+  check-oas-for-drift:
+    name: Check OAS for drift
+    needs: [detect-services]
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      needs.detect-services.outputs.oas-drift-services != '[]'
+    uses: ./.github/workflows/check-oas-for-drift.yml
+    secrets:
+      WALLET_STS_BACK_DEPLOY_KEY: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
+      WALLET_CRS_DEPLOY_KEY: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
