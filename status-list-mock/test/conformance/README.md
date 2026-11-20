@@ -75,8 +75,8 @@ a clear error if not.
 ## OAS drift detection
 
 The CRS spec copied in this repo (`crs-private-spec.yaml`, `crs-public-spec.yaml`) must
-stay in sync with the upstream CRS service. The `check-oas-for-drift` workflow runs daily
-and on every PR — it clones the `crs-backend` repo and uses
+stay in sync with the upstream CRS service. The shared `check-oas-for-drift` workflow (which
+also covers `sts-mock`) runs daily and on PRs that change this mock — for this mock it clones the `crs-backend` repo and uses
 [oasdiff](https://github.com/oasdiff/oasdiff) to diff the upstream spec against the local
 copy. Any difference fails the workflow and triggers a Slack alert.
 
