@@ -8,6 +8,7 @@
   "scripts": {
     "build": "sam build --template template.yaml",
     "dev": "npm run localAws:up && npm run invoke:JwksFunction && npm run start:api",
+    "predev": "command -v sam >/dev/null 2>&1 || { echo '❌ aws-sam-cli not found. Install it: brew install aws-sam-cli (see README Prerequisites).'; exit 1; }",
     "checkov": "checkov --file ./template.yaml",
     "format": "./node_modules/.bin/prettier --write '**/*.ts' 'openApiSpec/mock/api-spec.yaml'",
     "lint": "./node_modules/.bin/eslint ./src/functions",

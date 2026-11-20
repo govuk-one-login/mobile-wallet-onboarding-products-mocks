@@ -12,6 +12,7 @@ This service is built with TypeScript and Node.js, deployed as AWS Lambda functi
 
 - [Node.js](https://nodejs.org/en) — we recommend managing versions with [nvm](https://github.com/nvm-sh/nvm)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run locally and to build the app image
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) — required by `npm run dev` and `npm run build`. On macOS: `brew install aws-sam-cli`
 
 ## Set up locally
 
