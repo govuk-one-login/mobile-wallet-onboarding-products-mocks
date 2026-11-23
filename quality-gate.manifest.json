@@ -9,7 +9,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/pull-request-checks.yml",
-            "path": "jobs.check-sam-template-formatting"
+            "path": "jobs.check-sam-template-formatting-status-list-mock"
           },
           "check-types": [
             "code style and linting"
@@ -20,7 +20,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/pull-request-checks.yml",
-            "path": "jobs.validate-and-build-sam-template"
+            "path": "jobs.validate-and-build-sam-template-status-list-mock"
           },
           "check-types": [
             "code quality"
@@ -31,7 +31,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/pull-request-checks.yml",
-            "path": "jobs.node-ci"
+            "path": "jobs.node-ci-status-list-mock"
           },
           "check-types": [
             "code style and linting",
@@ -47,7 +47,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/pull-request-checks.yml",
-            "path": "jobs.run-checkov"
+            "path": "jobs.run-checkov-status-list-mock"
           },
           "check-types": [
             "code quality",
@@ -59,7 +59,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/pull-request-checks.yml",
-            "path": "jobs.check-oas-for-drift"
+            "path": "jobs.check-oas-for-drift-status-list-mock"
           },
           "check-types": [
             "code quality"
@@ -70,7 +70,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/push-to-main.yml",
-            "path": "jobs.check-sam-template-formatting"
+            "path": "jobs.check-sam-template-formatting-status-list-mock"
           },
           "check-types": [
             "code style and linting"
@@ -81,7 +81,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/push-to-main.yml",
-            "path": "jobs.run-checkov"
+            "path": "jobs.run-checkov-status-list-mock"
           },
           "check-types": [
             "code quality",
@@ -93,7 +93,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/push-to-main.yml",
-            "path": "jobs.node-ci"
+            "path": "jobs.node-ci-status-list-mock"
           },
           "check-types": [
             "code style and linting",
@@ -109,7 +109,7 @@
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/push-to-main.yml",
-            "path": "jobs.deploy"
+            "path": "jobs.deploy-status-list-mock"
           },
           "check-types": [
             "code quality"

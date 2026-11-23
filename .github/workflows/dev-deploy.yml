@@ -1,5 +1,8 @@
 name: Deploy to Dev
 
+# Secrets are resolved by name as <ENVIRONMENT>_<SECRET-PREFIX>_<SUFFIX>,
+# e.g. DEV_STS_MOCK_GH_ACTIONS_ROLE_ARN (see _reusable-sam-deploy.yml).
+
 on:
   workflow_dispatch:
     inputs:
@@ -23,36 +26,60 @@ permissions:
   contents: read
 
 jobs:
-  detect-services:
-    name: Detect services
-    uses: ./.github/workflows/_reusable-detect-services.yml
-    with:
-      selected-service: ${{ inputs.service }}
-
-  deploy:
-    name: Deploy (${{ matrix.service.name }})
-    needs: [detect-services]
-    if: needs.detect-services.outputs.services != '[]'
+  deploy-sts-mock:
+    name: Deploy (sts-mock)
+    if: inputs.service == 'all' || inputs.service == 'sts-mock'
     permissions:
       id-token: write
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        service: ${{ fromJSON(needs.detect-services.outputs.services) }}
     uses: ./.github/workflows/_reusable-sam-deploy.yml
     with:
-      service: ${{ matrix.service.name }}
-      working-directory: ${{ matrix.service.directory }}
-      secret-prefix: ${{ matrix.service.secret-prefix }}
+      service: sts-mock
+      working-directory: sts-mock
+      secret-prefix: STS_MOCK
       environment: DEV
       git-ref: ${{ inputs.gitRef }}
-      sam-version: ${{ matrix.service.sam-version }}
-      sam-build-args: ${{ matrix.service.sam-build-args }}
-      node: ${{ matrix.service.node }}
-      container: ${{ matrix.service.container }}
-      sign-container: false
-      sign-sam-artifact: ${{ matrix.service.sign-sam-artifact-dev }}
-      upload-method: ${{ matrix.service.dev-upload-method }}
-      timeout-minutes: ${{ matrix.service.deploy-timeout-minutes }}
+      sam-version: 1.155.2
+      container: true
+      upload-method: aws-cli
+      timeout-minutes: 15
+    secrets: inherit
+
+  deploy-status-list-mock:
+    name: Deploy (status-list-mock)
+    if: inputs.service == 'all' || inputs.service == 'status-list-mock'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: status-list-mock
+      working-directory: status-list-mock
+      secret-prefix: STATUS_LIST_MOCK
+      environment: DEV
+      git-ref: ${{ inputs.gitRef }}
+      sam-version: 1.132.0
+      sam-build-args: --parallel
+      node: true
+      sign-sam-artifact: true
+      upload-method: devplatform-action
+      timeout-minutes: 15
+    secrets: inherit
+
+  deploy-txma-mock:
+    name: Deploy (txma-mock)
+    if: inputs.service == 'all' || inputs.service == 'txma-mock'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: txma-mock
+      working-directory: txma-mock
+      secret-prefix: TXMA_MOCK
+      environment: DEV
+      git-ref: ${{ inputs.gitRef }}
+      sam-version: 1.155.2
+      upload-method: devplatform-action
+      timeout-minutes: 30
     secrets: inherit
