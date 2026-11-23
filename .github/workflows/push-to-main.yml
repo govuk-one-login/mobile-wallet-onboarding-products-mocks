@@ -85,7 +85,7 @@ jobs:
 
   deploy-sts-mock:
     name: Deploy (sts-mock)
-    needs: [detect-changes, validate-docker-image-sts-mock]
+    needs: [detect-changes, run-checkov-sts-mock, validate-docker-image-sts-mock]
     if: needs.detect-changes.outputs.sts-mock == 'true'
     permissions:
       id-token: write
@@ -134,7 +134,7 @@ jobs:
 
   deploy-status-list-mock:
     name: Deploy (status-list-mock)
-    needs: [detect-changes, node-ci-status-list-mock]
+    needs: [detect-changes, run-checkov-status-list-mock, node-ci-status-list-mock]
     if: needs.detect-changes.outputs.status-list-mock == 'true'
     permissions:
       id-token: write
@@ -172,7 +172,7 @@ jobs:
 
   deploy-txma-mock:
     name: Deploy (txma-mock)
-    needs: [detect-changes]
+    needs: [detect-changes, run-checkov-txma-mock]
     if: needs.detect-changes.outputs.txma-mock == 'true'
     permissions:
       id-token: write
