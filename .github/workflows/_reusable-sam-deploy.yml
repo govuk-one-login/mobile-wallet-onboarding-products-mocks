@@ -1,10 +1,5 @@
 name: Deploy SAM application
 
-# Builds and uploads a service's SAM application to the deployment pipeline's
-# artifact bucket. Service/environment specific secrets are resolved by name:
-#   <ENVIRONMENT>_<SECRET-PREFIX>_<SUFFIX>, e.g. BUILD_STS_MOCK_GH_ACTIONS_ROLE_ARN
-# Callers must pass `secrets: inherit`.
-
 on:
   workflow_call:
     inputs:

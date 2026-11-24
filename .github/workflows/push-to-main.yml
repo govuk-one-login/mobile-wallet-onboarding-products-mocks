@@ -1,8 +1,5 @@
 name: Push to Main
 
-# Secrets are resolved by name as <ENVIRONMENT>_<SECRET-PREFIX>_<SUFFIX>,
-# e.g. BUILD_STS_MOCK_GH_ACTIONS_ROLE_ARN (see _reusable-sam-deploy.yml).
-
 on:
   workflow_dispatch:
     inputs:

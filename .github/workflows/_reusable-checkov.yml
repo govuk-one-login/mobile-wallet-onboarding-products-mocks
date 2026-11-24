@@ -1,4 +1,5 @@
 name: Run Checkov Static Analysis
+
 on:
   workflow_call:
     inputs:
