@@ -8,6 +8,19 @@ Code repository for mocks maintained by Wallet Onboarding Products. This project
 * [`txma-mock`](./txma-mock/) - A mock of the Mobile Platform `POST /txma-event` endpoint, built using API Gateway's mock integration.
 * [`status-list-mock`](./status-list-mock/) - A mock implementation of the Status List service used by GOV.UK Wallet to check the current status of its stored credentials.
 
+## GitHub Actions workflows
+
+The pre-merge, post-merge and dev deploy workflows cover all three mocks and are built from reusable modules (`_reusable-*.yml`) in `.github/workflows`:
+
+* `pull-request-checks.yml` - pre-merge checks.
+* `push-to-main.yml` - post-merge checks and upload to the build environment.
+* `dev-deploy.yml` - manual deploy to dev (choose a service or `all`, plus a git ref).
+* `check-oas-for-drift.yml` - daily/manual check that the OpenAPI specs of `sts-mock` and `status-list-mock` match their upstream services. Pull requests run the same check from `pull-request-checks.yml`.
+
+`pull-request-checks.yml` and `push-to-main.yml` start with a `detect-changes` job that uses [`dorny/paths-filter`](https://github.com/dorny/paths-filter) to work out which mocks changed. A change under a mock's directory, or to the workflow itself or any `_reusable-*.yml`, runs the jobs for that mock. Manual runs of `push-to-main.yml` and `dev-deploy.yml` use the `service` input instead. Each mock has its own jobs, with settings such as the SAM version, secret prefix and timeouts passed as inputs to the reusable workflows. Secrets are resolved by name as `<ENVIRONMENT>_<SECRET-PREFIX>_<SUFFIX>`, for example `BUILD_STS_MOCK_GH_ACTIONS_ROLE_ARN`.
+
+To add a new mock, add a filter and the per-mock jobs to `pull-request-checks.yml` and `push-to-main.yml`, a job to `dev-deploy.yml`, the `service` choice option to the manual workflows, and create the matching secrets.
+
 ## Contributing
 
 This project uses [pre-commit](https://pre-commit.com/) to enforce code quality and validate commit messages against [Conventional Commits](https://github.com/conventional-changelog/commitlint) standards across all projects in this repository. Non-conforming messages will be rejected.

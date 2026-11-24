@@ -1,0 +1,57 @@
+name: Check OAS for Drift
+
+# Scheduled / manual check that each mock's OpenAPI spec matches its upstream service.
+# Pull requests run the same checks from pull-request-checks.yml.
+
+on:
+  schedule:
+    # runs at midnight every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to check
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - sts-mock
+          - status-list-mock
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check-oas-for-drift-sts-mock:
+    name: Check STS Back OAS for drift
+    if: github.event_name == 'schedule' || inputs.service == 'all' || inputs.service == 'sts-mock'
+    uses: ./.github/workflows/_reusable-oas-drift.yml
+    with:
+      display-name: STS Back
+      upstream-repository: govuk-one-login/sts-back
+      upstream-checkout-path: sts-back
+      upstream-oas-path: backend-api/openapi/sts-backend.yaml
+      local-oas-path: sts-mock/sts.yaml
+      normalise: true
+    secrets:
+      DEPLOY_KEY: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
+
+  check-oas-for-drift-status-list-mock:
+    name: Check Status List OAS for drift
+    if: github.event_name == 'schedule' || inputs.service == 'all' || inputs.service == 'status-list-mock'
+    uses: ./.github/workflows/_reusable-oas-drift.yml
+    with:
+      display-name: Status List
+      upstream-repository: govuk-one-login/crs-backend
+      upstream-checkout-path: status-list-mock/crs-backend
+      upstream-oas-path: backend/openApiSpecs/crs-status-api.yaml
+      local-oas-path: status-list-mock/openApiSpec/crs/crs-status-api.yaml
+    secrets:
+      DEPLOY_KEY: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}

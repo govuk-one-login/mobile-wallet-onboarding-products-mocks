@@ -1,0 +1,82 @@
+name: Deploy to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to deploy
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - sts-mock
+          - status-list-mock
+          - txma-mock
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-sts-mock:
+    name: Deploy (sts-mock)
+    if: inputs.service == 'all' || inputs.service == 'sts-mock'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: sts-mock
+      working-directory: sts-mock
+      secret-prefix: STS_MOCK
+      environment: DEV
+      git-ref: ${{ inputs.gitRef }}
+      sam-version: 1.155.2
+      container: true
+      upload-method: aws-cli
+      timeout-minutes: 15
+    secrets: inherit
+
+  deploy-status-list-mock:
+    name: Deploy (status-list-mock)
+    if: inputs.service == 'all' || inputs.service == 'status-list-mock'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: status-list-mock
+      working-directory: status-list-mock
+      secret-prefix: STATUS_LIST_MOCK
+      environment: DEV
+      git-ref: ${{ inputs.gitRef }}
+      sam-version: 1.132.0
+      sam-build-args: --parallel
+      node: true
+      sign-sam-artifact: true
+      upload-method: devplatform-action
+      timeout-minutes: 15
+    secrets: inherit
+
+  deploy-txma-mock:
+    name: Deploy (txma-mock)
+    if: inputs.service == 'all' || inputs.service == 'txma-mock'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: txma-mock
+      working-directory: txma-mock
+      secret-prefix: TXMA_MOCK
+      environment: DEV
+      git-ref: ${{ inputs.gitRef }}
+      sam-version: 1.155.2
+      upload-method: devplatform-action
+      timeout-minutes: 30
+    secrets: inherit

@@ -8,8 +8,8 @@
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
-            "path": "jobs.check-sam-template-formatting"
+            "file": ".github/workflows/pull-request-checks.yml",
+            "path": "jobs.check-sam-template-formatting-status-list-mock"
           },
           "check-types": [
             "code style and linting"
@@ -19,8 +19,19 @@
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
-            "path": "jobs.validate-and-build-sam-template"
+            "file": ".github/workflows/pull-request-checks.yml",
+            "path": "jobs.validate-and-build-sam-template-status-list-mock"
+          },
+          "check-types": [
+            "code quality"
+          ]
+        },
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/pull-request-checks.yml",
+            "path": "jobs.node-ci-status-list-mock"
           },
           "check-types": [
             "code style and linting",
@@ -35,8 +46,8 @@
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
-            "path": "jobs.run-checkov"
+            "file": ".github/workflows/pull-request-checks.yml",
+            "path": "jobs.run-checkov-status-list-mock"
           },
           "check-types": [
             "code quality",
@@ -47,8 +58,8 @@
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/status-list-mock-pull-request-checks.yml",
-            "path": "jobs.check-oas-for-drift"
+            "file": ".github/workflows/pull-request-checks.yml",
+            "path": "jobs.check-oas-for-drift-status-list-mock"
           },
           "check-types": [
             "code quality"
@@ -58,8 +69,8 @@
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/status-list-mock-push-to-main.yml",
-            "path": "jobs.check-sam-template-formatting"
+            "file": ".github/workflows/push-to-main.yml",
+            "path": "jobs.check-sam-template-formatting-status-list-mock"
           },
           "check-types": [
             "code style and linting"
@@ -69,8 +80,8 @@
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/status-list-mock-push-to-main.yml",
-            "path": "jobs.run-checkov"
+            "file": ".github/workflows/push-to-main.yml",
+            "path": "jobs.run-checkov-status-list-mock"
           },
           "check-types": [
             "code quality",
@@ -81,8 +92,8 @@
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/status-list-mock-push-to-main.yml",
-            "path": "jobs.deploy"
+            "file": ".github/workflows/push-to-main.yml",
+            "path": "jobs.node-ci-status-list-mock"
           },
           "check-types": [
             "code style and linting",
@@ -91,6 +102,17 @@
             "code quality",
             "vulnerability detection",
             "secret scanning"
+          ]
+        },
+        {
+          "phase": "pre-upload",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/push-to-main.yml",
+            "path": "jobs.deploy-status-list-mock"
+          },
+          "check-types": [
+            "code quality"
           ]
         }
       ]

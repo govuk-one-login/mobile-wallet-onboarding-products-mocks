@@ -1,0 +1,91 @@
+name: Check OAS for drift
+
+# Compares a mock's OpenAPI spec with the upstream service's spec and fails on any difference.
+
+on:
+  workflow_call:
+    inputs:
+      display-name:
+        description: Name of the upstream service, used in the job name
+        required: true
+        type: string
+      upstream-repository:
+        required: true
+        type: string
+      upstream-checkout-path:
+        required: true
+        type: string
+      upstream-oas-path:
+        description: Path of the spec within the upstream repository
+        required: true
+        type: string
+      local-oas-path:
+        description: Path of the mock's spec within this repository
+        required: true
+        type: string
+      normalise:
+        description: Resolve YAML anchors and merge keys before comparing
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      DEPLOY_KEY:
+        description: SSH deploy key for the upstream repository
+        required: true
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  check-oas-for-drift:
+    name: Check ${{ inputs.display-name }} OAS for drift
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      UPSTREAM_CHECKOUT_PATH: ${{ inputs.upstream-checkout-path }}
+      UPSTREAM_OAS_PATH: ${{ inputs.upstream-oas-path }}
+      LOCAL_OAS_PATH: ${{ inputs.local-oas-path }}
+    steps:
+      - name: Check out OP Mocks repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check out upstream repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ inputs.upstream-repository }}
+          path: ${{ inputs.upstream-checkout-path }}
+          ref: main
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Set spec paths
+        id: specs
+        env:
+          NORMALISE: ${{ inputs.normalise }}
+        run: |
+          if [[ "$NORMALISE" == "true" ]]; then
+            # oasdiff cannot parse YAML files with duplicate merge keys (<<)
+            # explode(.) resolves all anchors, aliases and merge keys inline
+            yq eval 'explode(.)' "$UPSTREAM_CHECKOUT_PATH/$UPSTREAM_OAS_PATH" > upstream-normalised.yaml
+            yq eval 'explode(.)' "$LOCAL_OAS_PATH" > local-normalised.yaml
+            echo "base=upstream-normalised.yaml" >> "$GITHUB_OUTPUT"
+            echo "revision=local-normalised.yaml" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=$UPSTREAM_CHECKOUT_PATH/$UPSTREAM_OAS_PATH" >> "$GITHUB_OUTPUT"
+            echo "revision=$LOCAL_OAS_PATH" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check OAS for drift
+        uses: oasdiff/oasdiff-action/diff@0546e2ebdc9d3589d594cfcef445c61ca02cabf1 # v0.2.0
+        with:
+          base: ${{ steps.specs.outputs.base }}
+          revision: ${{ steps.specs.outputs.revision }}
+          fail-on-diff: true
+
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    needs: [check-oas-for-drift]
+    if: failure()
+    uses: ./.github/workflows/_reusable-notify-slack-on-failure.yml
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}

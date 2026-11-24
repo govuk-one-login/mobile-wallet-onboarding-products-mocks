@@ -1,0 +1,184 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect changed services
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      sts-mock: ${{ steps.filter.outputs.sts-mock }}
+      status-list-mock: ${{ steps.filter.outputs.status-list-mock }}
+      txma-mock: ${{ steps.filter.outputs.txma-mock }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            shared: &shared
+              - .github/workflows/pull-request-checks.yml
+              - .github/workflows/_reusable-*.yml
+            sts-mock:
+              - *shared
+              - sts-mock/**
+            status-list-mock:
+              - *shared
+              - status-list-mock/**
+            txma-mock:
+              - *shared
+              - txma-mock/**
+
+  # ---------------------------------------------------------------- sts-mock
+  check-sam-template-formatting-sts-mock:
+    name: Check SAM template formatting (sts-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-format-check.yml
+    with:
+      working-directory: ./sts-mock
+
+  validate-docker-image-sts-mock:
+    name: Validate Docker image (sts-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    uses: ./.github/workflows/_reusable-docker-validate.yml
+    with:
+      working-directory: ./sts-mock
+
+  validate-and-build-sam-template-sts-mock:
+    name: Validate and build SAM template (sts-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-validate.yml
+    with:
+      working-directory: ./sts-mock
+      sam-version: 1.155.2
+
+  run-checkov-sts-mock:
+    name: Run Checkov (sts-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    uses: ./.github/workflows/_reusable-checkov.yml
+    with:
+      file-to-scan: sts-mock/template.yaml
+
+  check-oas-for-drift-sts-mock:
+    name: Check STS Back OAS for drift
+    needs: [detect-changes]
+    if: >-
+      needs.detect-changes.outputs.sts-mock == 'true' &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    uses: ./.github/workflows/_reusable-oas-drift.yml
+    with:
+      display-name: STS Back
+      upstream-repository: govuk-one-login/sts-back
+      upstream-checkout-path: sts-back
+      upstream-oas-path: backend-api/openapi/sts-backend.yaml
+      local-oas-path: sts-mock/sts.yaml
+      normalise: true
+    secrets:
+      DEPLOY_KEY: ${{ secrets.WALLET_STS_BACK_DEPLOY_KEY }}
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
+
+  # -------------------------------------------------------- status-list-mock
+  check-sam-template-formatting-status-list-mock:
+    name: Check SAM template formatting (status-list-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-format-check.yml
+    with:
+      working-directory: ./status-list-mock
+
+  node-ci-status-list-mock:
+    name: Node.js CI (status-list-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: status-list-mock
+      run-lint: true
+      run-sonar: ${{ github.actor != 'dependabot[bot]' }}
+      quality-gate-timeout-minutes: 5
+    secrets: inherit
+
+  validate-and-build-sam-template-status-list-mock:
+    name: Validate and build SAM template (status-list-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-validate.yml
+    with:
+      working-directory: ./status-list-mock
+      sam-version: 1.132.0
+      sam-build-args: --parallel
+
+  run-checkov-status-list-mock:
+    name: Run Checkov (status-list-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    uses: ./.github/workflows/_reusable-checkov.yml
+    with:
+      file-to-scan: status-list-mock/template.yaml
+
+  check-oas-for-drift-status-list-mock:
+    name: Check Status List OAS for drift
+    needs: [detect-changes]
+    if: >-
+      needs.detect-changes.outputs.status-list-mock == 'true' &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    uses: ./.github/workflows/_reusable-oas-drift.yml
+    with:
+      display-name: Status List
+      upstream-repository: govuk-one-login/crs-backend
+      upstream-checkout-path: status-list-mock/crs-backend
+      upstream-oas-path: backend/openApiSpecs/crs-status-api.yaml
+      local-oas-path: status-list-mock/openApiSpec/crs/crs-status-api.yaml
+    secrets:
+      DEPLOY_KEY: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
+
+  # --------------------------------------------------------------- txma-mock
+  check-sam-template-formatting-txma-mock:
+    name: Check SAM template formatting (txma-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.txma-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-format-check.yml
+    with:
+      working-directory: ./txma-mock
+
+  validate-and-build-sam-template-txma-mock:
+    name: Validate and build SAM template (txma-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.txma-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-validate.yml
+    with:
+      working-directory: ./txma-mock
+      sam-version: 1.155.2
+
+  run-checkov-txma-mock:
+    name: Run Checkov (txma-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.txma-mock == 'true'
+    uses: ./.github/workflows/_reusable-checkov.yml
+    with:
+      file-to-scan: txma-mock/template.yaml

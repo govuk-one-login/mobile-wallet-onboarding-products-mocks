@@ -1,0 +1,187 @@
+name: Push to Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to build and upload
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - sts-mock
+          - status-list-mock
+          - txma-mock
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect changed services
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      # Manual runs select the chosen service (or all) instead of using changed files
+      sts-mock: ${{ (github.event_name == 'workflow_dispatch' && (inputs.service == 'all' || inputs.service == 'sts-mock')) || steps.filter.outputs.sts-mock == 'true' }}
+      status-list-mock: ${{ (github.event_name == 'workflow_dispatch' && (inputs.service == 'all' || inputs.service == 'status-list-mock')) || steps.filter.outputs.status-list-mock == 'true' }}
+      txma-mock: ${{ (github.event_name == 'workflow_dispatch' && (inputs.service == 'all' || inputs.service == 'txma-mock')) || steps.filter.outputs.txma-mock == 'true' }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Detect changed services
+        id: filter
+        if: github.event_name == 'push'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            shared: &shared
+              - .github/workflows/push-to-main.yml
+              - .github/workflows/_reusable-*.yml
+            sts-mock:
+              - *shared
+              - sts-mock/**
+            status-list-mock:
+              - *shared
+              - status-list-mock/**
+            txma-mock:
+              - *shared
+              - txma-mock/**
+
+  # ---------------------------------------------------------------- sts-mock
+  check-sam-template-formatting-sts-mock:
+    name: Check SAM template formatting (sts-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-format-check.yml
+    with:
+      working-directory: ./sts-mock
+
+  run-checkov-sts-mock:
+    name: Run Checkov (sts-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    uses: ./.github/workflows/_reusable-checkov.yml
+    with:
+      file-to-scan: sts-mock/template.yaml
+
+  validate-docker-image-sts-mock:
+    name: Validate Docker image (sts-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    uses: ./.github/workflows/_reusable-docker-validate.yml
+    with:
+      working-directory: ./sts-mock
+
+  deploy-sts-mock:
+    name: Deploy (sts-mock)
+    needs: [detect-changes, run-checkov-sts-mock, validate-docker-image-sts-mock]
+    if: needs.detect-changes.outputs.sts-mock == 'true'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: sts-mock
+      working-directory: sts-mock
+      secret-prefix: STS_MOCK
+      environment: BUILD
+      sam-version: 1.155.2
+      container: true
+      sign-container: true
+      upload-method: devplatform-action
+      timeout-minutes: 15
+    secrets: inherit
+
+  # -------------------------------------------------------- status-list-mock
+  check-sam-template-formatting-status-list-mock:
+    name: Check SAM template formatting (status-list-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-format-check.yml
+    with:
+      working-directory: ./status-list-mock
+
+  run-checkov-status-list-mock:
+    name: Run Checkov (status-list-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    uses: ./.github/workflows/_reusable-checkov.yml
+    with:
+      file-to-scan: status-list-mock/template.yaml
+
+  node-ci-status-list-mock:
+    name: Node.js CI (status-list-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: status-list-mock
+      run-lint: false
+      run-sonar: true
+      quality-gate-timeout-minutes: 15
+    secrets: inherit
+
+  deploy-status-list-mock:
+    name: Deploy (status-list-mock)
+    needs: [detect-changes, run-checkov-status-list-mock, node-ci-status-list-mock]
+    if: needs.detect-changes.outputs.status-list-mock == 'true'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: status-list-mock
+      working-directory: status-list-mock
+      secret-prefix: STATUS_LIST_MOCK
+      environment: BUILD
+      sam-version: 1.132.0
+      sam-build-args: --parallel
+      node: true
+      sign-sam-artifact: true
+      upload-method: devplatform-action
+      timeout-minutes: 15
+    secrets: inherit
+
+  # --------------------------------------------------------------- txma-mock
+  check-sam-template-formatting-txma-mock:
+    name: Check SAM template formatting (txma-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.txma-mock == 'true'
+    uses: ./.github/workflows/_reusable-sam-format-check.yml
+    with:
+      working-directory: ./txma-mock
+
+  run-checkov-txma-mock:
+    name: Run Checkov (txma-mock)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.txma-mock == 'true'
+    uses: ./.github/workflows/_reusable-checkov.yml
+    with:
+      file-to-scan: txma-mock/template.yaml
+
+  deploy-txma-mock:
+    name: Deploy (txma-mock)
+    needs: [detect-changes, run-checkov-txma-mock]
+    if: needs.detect-changes.outputs.txma-mock == 'true'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      service: txma-mock
+      working-directory: txma-mock
+      secret-prefix: TXMA_MOCK
+      environment: BUILD
+      sam-version: 1.155.2
+      sign-sam-artifact: true
+      upload-method: devplatform-action
+      timeout-minutes: 30
+    secrets: inherit
