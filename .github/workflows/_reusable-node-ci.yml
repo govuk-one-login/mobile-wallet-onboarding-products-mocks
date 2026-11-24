@@ -21,7 +21,7 @@ on:
         type: number
         default: 15
     secrets:
-      SONAR_TOKEN:
+      SONAR_PROJECT_SCANNING_KEY:
         required: false
 
 jobs:
@@ -67,7 +67,7 @@ jobs:
         with:
           projectBaseDir: ${{ inputs.working-directory }}
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_PROJECT_SCANNING_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check SonarQube quality gate
@@ -75,6 +75,6 @@ jobs:
         uses: SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1
         timeout-minutes: ${{ inputs.quality-gate-timeout-minutes }}
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_PROJECT_SCANNING_KEY }}
         with:
           scanMetadataReportFile: ${{ inputs.working-directory }}/.scannerwork/report-task.txt
